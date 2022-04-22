@@ -15,7 +15,8 @@ library(esquisse)
 
 
 ```{r read in data}
-childhealthdata <- read_csv("C:/Users/rebec/Documents/Rutgers SSW/Courses/Data Visualization/Final Project/ChildHealthData_Edited_1920_ONLY.csv")
+childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
+
 
 introduce(childhealthdata)
 #fixing column names 
