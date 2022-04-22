@@ -1,0 +1,226 @@
+---
+title: "FinalDraft1"
+output: pdf_document
+author: Rebecca Connelly
+---
+
+```{r setup, }
+library(tidyverse)
+library(DataExplorer)
+library(esquisse)
+```
+
+## R Markdown
+
+
+
+```{r read in data}
+childhealthdata <- read_csv("C:/Users/rebec/Documents/Rutgers SSW/Courses/Data Visualization/Final Project/ChildHealthData_Edited_1920_ONLY.csv")
+
+introduce(childhealthdata)
+#fixing column names 
+
+names(childhealthdata) <- make.names(names(childhealthdata), unique=TRUE)
+
+
+#editing race variable 
+
+childhealthdata$Race = as.factor(childhealthdata$Race) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(RaceCat = recode(Race, 
+  "1" = "Hispanic",
+  "2" = "White",
+  "3" = "Black",
+  "4" = "Asian",
+  "5" = "Other",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+```
+
+
+```{r health status, }
+childhealthdata$ChildHealthStatus_1920 = as.factor(childhealthdata$ChildHealthStatus_1920) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHealthStatus_1920, 
+  "1" = "Excellent or Very Good",
+  "2" = "Good",
+  "3" = "Fair or Poor",
+  "99" = "Unknown",
+  .default = "Unknown"))
+```
+
+```{r sex variable}
+childhealthdata$Sex1920 = as.factor(childhealthdata$Sex1920) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(Sex = recode(Sex1920, 
+  "1" = "Male",
+  "2" = "Female",
+  "99" = "Missing",
+  .default = "Missing"))
+```
+
+```{r state}
+childhealthdata$State.FIPS.Code = as.factor(childhealthdata$State.FIPS.Code) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(State = recode(State.FIPS.Code, 
+  "1" = "AL",
+"2" = "AK",
+"4" = "AZ",
+"5" = "AR",
+"6" = "CA",
+"8" = "CO",
+"9" = "CT",
+"10" = "DE",
+"12" = "FL",
+"13" = "GA",
+"15" = "HI",
+"16" = "ID",
+"17" = "IL",
+"18" = "IN",
+"19" = "IA",
+"20" = "KS",
+"21" = "KY",
+"22" = "LA",
+"23" = "ME",
+"24" = "MD",
+"25" = "MA",
+"26" = "MI",
+"27" = "MN",
+"28" = "MS",
+"29" = "MO",
+"30" = "MT",
+"31" = "NE",
+"32" = "NV",
+"33" = "NH",
+"34" = "NJ",
+"35" = "NM",
+"36" = "NY",
+"37" = "NC",
+"38" = "ND",
+"39" = "OH",
+"40" = "OK",
+"41" = "OR",
+"42" = "PA",
+"44" = "RI",
+"45" = "SC",
+"46" = "SD",
+"47" = "TN",
+"48" = "TX",
+"49" = "UT",
+"50" = "VT",
+"51" = "VA",
+"53" = "WA",
+"54" = "WV",
+"55" = "WI",
+"56" = "WY",
+"60" = "AS",
+"66" = "GU",
+"69" = "MP",
+"72" = "PR",
+"78" = "VI",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+```
+
+```{r flourishing}
+childhealthdata$flrish0to5_1920 = as.factor(childhealthdata$flrish0to5_1920) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus = recode(flrish0to5_1920, 
+  "1" = "ALways",
+  "2" = "Usually",
+  "3" = "Sometimes",
+  "4" = "Never",
+  "90" = "NA",
+"95" =  "NA",
+  "99" = "Unknown",
+  .default = "Unknown"))
+```
+
+```{r forgone care}
+
+childhealthdata$ForgoneCare_1920 = as.factor(childhealthdata$ForgoneCare_1920) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(WentWithoutNeededHlthCare = recode(ForgoneCare_1920, 
+  "1" = "Yes",
+  "2" = "No",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+childhealthdata <- transform(childhealthdata,
+  NbhdSafe_1920 = factor(NbhdSafe_1920))
+```
+
+```{r creating variables}
+FiveAndUnder <- childhealthdata %>%
+  filter(Child.Age <= 5)
+
+flourishing <- FiveAndUnder %>% 
+  group_by(FlourishStatus) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+flourishing
+
+flourishingAllAges <- childhealthdata %>% 
+  group_by(FlourishStatus) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+
+
+MissedNeededCare <- FiveAndUnder %>%
+  filter(WentWithoutNeededHlthCare == "Yes")
+
+MissedNeededCare
+
+parentEmoSup <- FiveAndUnder %>%
+  filter(SomeoneEmoSup == 1)
+
+AgeGroups <- FiveAndUnder %>% 
+  group_by(Child.Age) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+AgeGroups
+
+MissedCarebyState <- MissedNeededCare %>%
+  group_by(State) %>%
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+MissedCarebyState
+
+```
+
+## Visualizing 
+```{r flourishing visual histogram}
+flourishplot <- ggplot(flourishing, aes(x = FlourishStatus, y = children, fill = children)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_b(name="Number of Children") +
+  labs(title = "Frequency of 'Flourishing' Status in Children Under 5", x = "Frequency", y = "Number of Children")
+
+flourishplot
+```
+
+```{r missed needed care histogram}
+missingcareplot <- ggplot(MissedCarebyState, aes(x = State, y = children, fill = children)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_b(name="Number of Children") + coord_flip() +
+  labs(title = "Number of Children who Missed Needed Care", x = "State", y = "Number of Children")
+
+missingcareplot
+```
+
+```{r}
+forgonebysexplot <- ggplot(FiveAndUnder) +
+  geom_bar(aes(x = WentWithoutNeededHlthCare, fill = Sex), position = "fill")
+
+ggplot(FiveAndUnder) +
+  geom_bar(aes(x = RaceCat, fill = FlourishStatus), position = "dodge")
+
+ggplot(childhealthdata) +
+  geom_bar(aes(x = RaceCat, fill = NbhdSafe_1920))
+```
+
