@@ -215,7 +215,7 @@ missingcareplot
 
 ```{r}
 forgonebysexplot <- ggplot(FiveAndUnder) +
-  geom_bar(aes(x = WentWithoutNeededHlthCare, fill = Sex), position = "fill")
+  geom_bar(aes(x = WentWithoutNeededHlthCare, fill = Child.Age), position = "fill")
 
 ggplot(FiveAndUnder) +
   geom_bar(aes(x = RaceCat, fill = FlourishStatus), position = "dodge")
