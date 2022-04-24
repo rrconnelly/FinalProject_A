@@ -23,8 +23,11 @@ introduce(childhealthdata)
 
 names(childhealthdata) <- make.names(names(childhealthdata), unique=TRUE)
 
+```
 
-#editing race variable 
+```{r editing variables}
+
+#race 
 
 childhealthdata$Race = as.factor(childhealthdata$Race) # converting to categorical
 
@@ -37,10 +40,8 @@ childhealthdata <- childhealthdata %>% mutate(RaceCat = recode(Race,
   "99" = "Unknown",
   .default = "Unknown"))
 
-```
+#health status
 
-
-```{r health status, }
 childhealthdata$ChildHealthStatus_1920 = as.factor(childhealthdata$ChildHealthStatus_1920) # converting to categorical
 
 childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHealthStatus_1920, 
@@ -49,9 +50,9 @@ childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHe
   "3" = "Fair or Poor",
   "99" = "Unknown",
   .default = "Unknown"))
-```
 
-```{r sex variable}
+#sex
+
 childhealthdata$Sex1920 = as.factor(childhealthdata$Sex1920) # converting to categorical
 
 childhealthdata <- childhealthdata %>% mutate(Sex = recode(Sex1920, 
@@ -59,9 +60,9 @@ childhealthdata <- childhealthdata %>% mutate(Sex = recode(Sex1920,
   "2" = "Female",
   "99" = "Missing",
   .default = "Missing"))
-```
 
-```{r state}
+#states
+
 childhealthdata$State.FIPS.Code = as.factor(childhealthdata$State.FIPS.Code) # converting to categorical
 
 childhealthdata <- childhealthdata %>% mutate(State = recode(State.FIPS.Code, 
@@ -123,13 +124,12 @@ childhealthdata <- childhealthdata %>% mutate(State = recode(State.FIPS.Code,
   "99" = "Unknown",
   .default = "Unknown"))
 
-```
+#flourishing status
 
-```{r flourishing}
 childhealthdata$flrish0to5_1920 = as.factor(childhealthdata$flrish0to5_1920) # converting to categorical
 
 childhealthdata <- childhealthdata %>% mutate(FlourishStatus = recode(flrish0to5_1920, 
-  "1" = "ALways",
+  "1" = "Always",
   "2" = "Usually",
   "3" = "Sometimes",
   "4" = "Never",
@@ -137,54 +137,80 @@ childhealthdata <- childhealthdata %>% mutate(FlourishStatus = recode(flrish0to5
 "95" =  "NA",
   "99" = "Unknown",
   .default = "Unknown"))
-```
 
-```{r forgone care}
+#forgoing care
 
 childhealthdata$ForgoneCare_1920 = as.factor(childhealthdata$ForgoneCare_1920) # converting to categorical
 
-childhealthdata <- childhealthdata %>% mutate(WentWithoutNeededHlthCare = recode(ForgoneCare_1920, 
+childhealthdata <- childhealthdata %>% mutate(WentWithoutCare = recode(ForgoneCare_1920, 
   "1" = "Yes",
   "2" = "No",
   "99" = "Unknown",
   .default = "Unknown"))
 
+childhealthdata <- childhealthdata %>% mutate(behavior_1920 = recode(behavior_1920, 
+  "1" = "No",
+  "2" = "Used to",
+  "3" = "Yes",
+  "99" = "Unknown",
+  "96" = "NA Under 3",
+  .default = "Unknown"))
+
 childhealthdata <- transform(childhealthdata,
   NbhdSafe_1920 = factor(NbhdSafe_1920))
+
+childhealthdata <- childhealthdata %>% mutate(NbhdSafe_1920 = recode(NbhdSafe_1920, 
+  "1" = "Definitely Agree",
+  "2" = "Somewhat Agree",
+  "3" = "Somewhat/Definitely Disagree",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+childhealthdata <- childhealthdata %>% mutate(povlev4_1920 = recode(povlev4_1920, 
+  "1" = "0-99% FPL",
+  "2" = "100% FPL or greater",
+  "3" = "100% FPL or greater",
+  "4" = "100% FPL or greater",
+  .default = "Unknown"))
+
+
+childhealthdata <- childhealthdata %>% mutate(EmSupport_1920 = recode(EmSupport_1920, 
+  "1" = "Yes",
+  "2" = "No",
+  "99" = "Unknown",
+  .default = "Unknown"))
 ```
 
-```{r creating variables}
+```{r creating new variables}
+
+#filters
 FiveAndUnder <- childhealthdata %>%
   filter(Child.Age <= 5)
 
-flourishing <- FiveAndUnder %>% 
-  group_by(FlourishStatus) %>% 
-  count() %>% arrange(desc(n)) %>%
-  rename("children" = n)
+MissedNeededCare <- childhealthdata %>%
+  filter(WentWithoutCare == "Yes")
 
-flourishing
-
-flourishingAllAges <- childhealthdata %>% 
-  group_by(FlourishStatus) %>% 
-  count() %>% arrange(desc(n)) %>%
-  rename("children" = n)
-
-
-
-MissedNeededCare <- FiveAndUnder %>%
-  filter(WentWithoutNeededHlthCare == "Yes")
-
-MissedNeededCare
-
-parentEmoSup <- FiveAndUnder %>%
+parentEmoSup <- childhealthdata %>%
   filter(SomeoneEmoSup == 1)
 
-AgeGroups <- FiveAndUnder %>% 
-  group_by(Child.Age) %>% 
+yesbehaviorprobsunder5 <- FiveAndUnder %>%
+  filter(behavior_1920 == "Yes")
+
+yesbehaviorprobsALL <- childhealthdata %>%
+  filter(behavior_1920 == "Yes")
+
+#creating new variables 
+
+flourishingunder5 <- FiveAndUnder %>% 
+  group_by(FlourishStatus) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-AgeGroups
+flourishingAll <- childhealthdata %>% 
+  group_by(FlourishStatus) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
 
 MissedCarebyState <- MissedNeededCare %>%
   group_by(State) %>%
@@ -205,7 +231,7 @@ flourishplot <- ggplot(flourishing, aes(x = FlourishStatus, y = children, fill =
 flourishplot
 ```
 
-```{r missed needed care histogram}
+```{r missed needed care}
 missingcareplot <- ggplot(MissedCarebyState, aes(x = State, y = children, fill = children)) +
   geom_bar(stat = "identity") +
   scale_fill_viridis_b(name="Number of Children") + coord_flip() +
@@ -214,14 +240,112 @@ missingcareplot <- ggplot(MissedCarebyState, aes(x = State, y = children, fill =
 missingcareplot
 ```
 
-```{r}
-forgonebysexplot <- ggplot(FiveAndUnder) +
-  geom_bar(aes(x = WentWithoutNeededHlthCare, fill = Sex), position = "fill")
+```{r forgone needed care}
+forgonebysexplot <- ggplot(childhealthdata) +
+  geom_bar(aes(x = WentWithoutCare, fill = Sex), position = "fill")
 
-ggplot(FiveAndUnder) +
+ggplot(childhealthdata) +
   geom_bar(aes(x = RaceCat, fill = FlourishStatus), position = "dodge")
 
 ggplot(childhealthdata) +
   geom_bar(aes(x = RaceCat, fill = NbhdSafe_1920))
+```
+
+```{r behavioral problems}
+
+behaviorprobs <- FiveAndUnder %>% 
+  group_by(behavior_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+#^not interesting, majority "no" or "unknown" 
+
+ggplot(behaviorprobsALL, aes(x = behavior_1920, y = children, fill = children)) +
+     geom_bar(stat = "identity") +
+     scale_fill_viridis_b(name="Number of Children") +
+     labs(title = "Children with Behavioral Problems Under 5", x = "Frequency", y = "Number of Children")
+
+yesbehaviorprobsALL %>% 
+  group_by(EmSupport_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+
+```
+
+```{r variables by poverty}
+ggplot(FiveAndUnder) +
+  geom_bar(aes(x = povlev4_1920, fill = FlourishStatus), position = "dodge")
+
+#missed care by FPL
+carebypoverty <- MissedNeededCare %>% 
+  group_by(povlev4_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+ggplot(carebypoverty, aes(x = povlev4_1920, y = children, fill = children)) +
+     geom_bar(stat = "identity") +
+     scale_fill_viridis_b(name="Number of Children") +
+     labs(title = "Children who did not receive needed care by poverty level", x = "Frequency", y = "Number of Children")
+
+#behavior problem by FPL
+
+BehavbyPov <- yesbehaviorprobsALL %>% 
+  group_by(povlev4_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+BehavbyPovALL <- yesbehaviorprobsALL %>% 
+  group_by(povlev4_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+ggplot(BehavbyPovALL, aes(x = povlev4_1920, y = children, fill = children)) +
+     geom_bar(stat = "identity") +
+     scale_fill_viridis_b(name="Number of Children") +
+     labs(title = "Children with behavioral problems by poverty level", x = "Frequency", y = "Number of Children")
+
+```
+
+```{r all children}
+
+#behavior 
+behaviorprobsALL <- childhealthdata %>% 
+  group_by(behavior_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+yesbehaviorprobsALL %>% 
+  group_by(povlev4_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+
+```
+
+```{r health status}
+
+FiveAndUnder %>% 
+  group_by(ChildHealthStatus) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+ggplot(FiveAndUnder) +
+  geom_bar(aes(x = ChildHealthStatus, fill = EmSupport_1920))
+
+ggplot(FiveAndUnder) +
+  geom_bar(aes(x = ChildHealthStatus, fill = povlev4_1920))
+
+
+```
+
+```{r emo support}
+ggplot(childhealthdata) +
+  geom_bar(aes(x = ChildHealthStatus, fill = EmSupport_1920))
+
+ggplot(childhealthdata) +
+  geom_bar(aes(x = behavior_1920, fill = EmSupport_1920))
+
+
 ```
 
