@@ -15,12 +15,7 @@ library(usmapdata)
 library(usmap)
 library(ggplot2)
 library(maps)
-
-#from Urban Institute for mapping
-devtools::install_github("UrbanInstitute/urbnmapr")
-
-library(urbnmapr)
-#not finding the urbnmapr package :/ 
+library(waffle)
 
 
 ```
@@ -31,7 +26,6 @@ library(urbnmapr)
 
 ```{r read in data}
 childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
-
 
 introduce(childhealthdata)
 #fixing column names 
@@ -259,14 +253,14 @@ flourishplot0to5 <- ggplot(flourishingunder5, aes(x = FlourishStatus, y = childr
   scale_fill_viridis_b(name="Number of Children") +
   labs(title = "Frequency of 'Flourishing' Status in Children", x = "Frequency", y = "Number of Children")
 
-flourishplot0to5
+#not interesting - most sometimes or usually
 
 flourishplot6to17 <- ggplot(flourishing6to17, aes(x = FlourishStatus6to17, y = children, fill = children)) +
   geom_bar(stat = "identity") +
   scale_fill_viridis_b(name="Number of Children") +
   labs(title = "Frequency of 'Flourishing' Status in Children", x = "Frequency", y = "Number of Children")
 
-flourishplot6to17
+#not interesting - most sometimes or usually
 ```
 
 ```{r missed needed care}
@@ -437,6 +431,11 @@ childhealthdata %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
+uninsured %>% 
+  group_by(ChildHealthStatus) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
 ggplot(childhealthdata) +
   geom_bar(aes(x = ChildHealthStatus, fill = InsGap_1920))
 
@@ -453,12 +452,6 @@ databyrace <- childhealthdata %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-myplot <- ggplot(childhealthdata, aes(RaceCat)) + 
-          geom_bar(aes(y = (..count..)/sum(..count..))) + 
-          scale_y_continuous(labels=scales::percent) +
-  ylab("relative frequencies")
-
-myplot
 ```
 
 ```{r}
