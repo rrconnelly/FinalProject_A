@@ -204,6 +204,14 @@ childhealthdata <- childhealthdata %>% mutate(InsGap_1920 = recode(InsGap_1920,
   "2" = "Uninsured or periods without coverage",
   "99" = "Unknown",
   .default = "Unknown"))
+
+childhealthdata <- childhealthdata %>% mutate(MotherMH_1920 = recode(MotherMH_1920, 
+  "1" = "Excellent or Very Good ",
+  "2" = "Good",
+  "3" = "Fai or Poor",
+  "99" = "Unknown",
+  "95" = "No Mother in Home",
+  .default = "Unknown"))
 ```
 
 ```{r creating new variables}
@@ -320,6 +328,8 @@ ggplot(childhealthdata) +
 
 ggplot(childhealthdata) +
   geom_bar(aes(x = RaceCat, fill = NbhdSafe_1920))
+
+#^TRY SEPARATING THESE GRAPHS OUT
 ```
 
 ```{r behavioral problems}
@@ -431,6 +441,9 @@ childhealthdata %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
+uninsured <- childhealthdata %>%
+  filter(InsGap_1920 == "Uninsured or periods without coverage")
+
 uninsured %>% 
   group_by(ChildHealthStatus) %>% 
   count() %>% arrange(desc(n)) %>%
@@ -438,9 +451,6 @@ uninsured %>%
 
 ggplot(childhealthdata) +
   geom_bar(aes(x = ChildHealthStatus, fill = InsGap_1920))
-
-uninsured <- childhealthdata %>%
-  filter(InsGap_1920 == "Uninsured or periods without coverage")
 
 uninsuredgrouped <- uninsured %>% 
   group_by(RaceCat) %>% 
