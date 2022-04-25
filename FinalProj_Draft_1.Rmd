@@ -153,6 +153,16 @@ childhealthdata <- childhealthdata %>% mutate(FlourishStatus = recode(flrish0to5
   "99" = "Unknown",
   .default = "Unknown"))
 
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus6to17 = recode(flrish6to17_1920, 
+  "1" = "Always",
+  "2" = "Usually",
+  "3" = "Sometimes",
+  "4" = "Never",
+  "90" = "NA",
+"95" =  "NA",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
 #forgoing care
 
 childhealthdata$ForgoneCare_1920 = as.factor(childhealthdata$ForgoneCare_1920) # converting to categorical
@@ -227,8 +237,8 @@ flourishingunder5 <- FiveAndUnder %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-flourishingAll <- childhealthdata %>% 
-  group_by(FlourishStatus) %>% 
+flourishing6to17 <- childhealthdata %>% 
+  group_by(FlourishStatus6to17) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
@@ -244,12 +254,19 @@ MissedCarebyState
 
 ## Visualizing 
 ```{r flourishing visual histogram}
-flourishplot <- ggplot(flourishingAll, aes(x = FlourishStatus, y = children, fill = children)) +
+flourishplot0to5 <- ggplot(flourishingunder5, aes(x = FlourishStatus, y = children, fill = children)) +
   geom_bar(stat = "identity") +
   scale_fill_viridis_b(name="Number of Children") +
   labs(title = "Frequency of 'Flourishing' Status in Children", x = "Frequency", y = "Number of Children")
 
-flourishplot
+flourishplot0to5
+
+flourishplot6to17 <- ggplot(flourishing6to17, aes(x = FlourishStatus6to17, y = children, fill = children)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_b(name="Number of Children") +
+  labs(title = "Frequency of 'Flourishing' Status in Children", x = "Frequency", y = "Number of Children")
+
+flourishplot6to17
 ```
 
 ```{r missed needed care}
@@ -262,6 +279,8 @@ missingcareplot <- ggplot(MissedCarebyState, aes(x = State, y = children, fill =
 missingcareplot
 
 #mapping 
+
+#because in my original data set I renamed the states column.. re-read it and left that column. 
 TESTchildhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
 
 names(TESTchildhealthdata) <- make.names(names(TESTchildhealthdata), unique=TRUE)
