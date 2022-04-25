@@ -11,12 +11,17 @@ library(esquisse)
 library(plotly)
 library(sf)
 library(devtools)
+library(usmapdata)
+library(usmap)
+library(ggplot2)
+library(maps)
 
 #from Urban Institute for mapping
 devtools::install_github("UrbanInstitute/urbnmapr")
 
 library(urbnmapr)
-library(urbnmapr)
+#not finding the urbnmapr package :/ 
+
 
 ```
 
@@ -257,18 +262,39 @@ missingcareplot <- ggplot(MissedCarebyState, aes(x = State, y = children, fill =
 missingcareplot
 
 #mapping 
-uninsuredmapdata <- left_join(MissedCarebyState,
-                          get_urbn_map(map = "states", sf = TRUE),
-                          by = "state_abbv")
+TESTchildhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
 
-ggplot() +
-  geom_sf(spatial_data,
-          mapping = aes(fill = horate),
-          color = "#ffffff", size = 0.25) +
-  labs(fill = "Homeownership rate")
+names(TESTchildhealthdata) <- make.names(names(TESTchildhealthdata), unique=TRUE)
+
+TESTchildhealthdata <- TESTchildhealthdata %>% mutate(WentWithoutCare = recode(ForgoneCare_1920, 
+  "1" = "Yes",
+  "2" = "No",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+TESTMissedNeededCare <- TESTchildhealthdata %>%
+  filter(WentWithoutCare == "Yes")
+
+TESTMissedCarebyState <- TESTMissedNeededCare %>%
+  group_by(State.FIPS.Code) %>%
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n) %>%
+  rename("fips" = "State.FIPS.Code")
+
+map_with_data(TESTMissedCarebyState, values = "children", include = c(), exclude = c(), na = NA)
+
+plot_usmap(
+regions = c("states"),
+data = data.frame(TESTMissedCarebyState),
+values = "children",
+theme = theme_void(),
+label_color = "black",
+) +
+  labs(title = "Number of Children Who Did not Receive Needed Care by State",
+       subtitle = "Source: National Survey of Children's Health: 2019-2020")
 
 
-
+#foudn on CRAN here: https://cran.r-project.org/web/packages/usmap/usmap.pdf
 
 ```
 
