@@ -322,7 +322,7 @@ forgonebysexplot <- ggplot(childhealthdata) +
   geom_bar(aes(x = WentWithoutCare, fill = Sex), position = "fill")
 
 ggplot(childhealthdata) +
-  geom_bar(aes(x = RaceCat, fill = FlourishStatus), position = "dodge")
+  geom_bar(aes(x = RaceCat, fill = FlourishStatus6to17), position = "dodge")
 
 ggplot(childhealthdata) +
   geom_bar(aes(x = RaceCat, fill = NbhdSafe_1920))
@@ -443,7 +443,12 @@ ggplot(childhealthdata) +
 uninsured <- childhealthdata %>%
   filter(InsGap_1920 == "Uninsured or periods without coverage")
 
-uninsured %>% 
+uninsuredgrouped <- uninsured %>% 
+  group_by(RaceCat) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+databyrace <- childhealthdata %>% 
   group_by(RaceCat) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
@@ -454,5 +459,53 @@ myplot <- ggplot(childhealthdata, aes(RaceCat)) +
   ylab("relative frequencies")
 
 myplot
+```
+
+```{r}
+#sorting out racial proportions
+library(tidycensus)
+load_variables(2019,'acs5',cache = TRUE)
+
+get_acs(
+  variables = "B02001_008", geography = "us", survey = "acs5", year = 2020,
+)
+
+#weights: 
+#white - 0.7041715
+#black - 0.1262439
+#asian - 0.05640958
+#AI/AN - 0.008232905
+#HI/PA - 0.001872203
+#other - 0.1030699
+#hispanic - 0.1817716
+
+databyrace
+
+#all races = 326569308
+#white alone = 229960813 = 0.7041715
+#white in combo = 245105778 = 0.7505475
+
+#black alone = 41227384 = 0.1262439
+#black in combo = 46273733 = 0.1416965
+
+#asian alone = 18421637 = 0.05640958
+#asian in combo = 22193536 = 0.06795965
+
+#AI/AN alone = 2688614 = 0.008232905
+#AI/AN in combo = 5779818 = 0.0176986
+
+#HI/PI alone = 611404  = 0.001872203
+#HI/PI in combo = 1441525 = 0.004414147
+
+#other race alone = 16783914 = 0.05139465
+#other two or more races = 16875542 = 0.05167522
+#other in combo = 24041125 = 0.07361722
+
+#hispanic or latino total = 59361020 = 0.1817716
+#not hispanic or latino = 267208288 =  0.8182284
+
+#not hispanic-white = 196251375 = 0.6009486
+#hipsanic white = 33709438 = 0.1032229
+
 ```
 
