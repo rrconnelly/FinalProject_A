@@ -137,23 +137,21 @@ childhealthdata <- childhealthdata %>% mutate(State = recode(State.FIPS.Code,
 
 childhealthdata$flrish0to5_1920 = as.factor(childhealthdata$flrish0to5_1920) # converting to categorical
 
-childhealthdata <- childhealthdata %>% mutate(FlourishStatus = recode(flrish0to5_1920, 
-  "1" = "Always",
-  "2" = "Usually",
-  "3" = "Sometimes",
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus0to5 = recode(flrish0to5_1920, 
+  "1" = "Meets 0-2 Items",
+  "2" = "Meets 3 Items",
+  "3" = "Meets all 4 Items",
   "4" = "Never",
-  "90" = "NA",
-"95" =  "NA",
+  "90" = "NA, Over 5",
+"95" =  "NA, under 6m",
   "99" = "Unknown",
   .default = "Unknown"))
 
 childhealthdata <- childhealthdata %>% mutate(FlourishStatus6to17 = recode(flrish6to17_1920, 
-  "1" = "Always",
-  "2" = "Usually",
-  "3" = "Sometimes",
-  "4" = "Never",
-  "90" = "NA",
-"95" =  "NA",
+  "1" = "Meets 0-1 Items",
+  "2" = "Meets 2 Items",
+  "3" = "Meets all 3 Items",
+  "90" = "NA, Under 5",
   "99" = "Unknown",
   .default = "Unknown"))
 
@@ -212,6 +210,20 @@ childhealthdata <- childhealthdata %>% mutate(MotherMH_1920 = recode(MotherMH_19
   "99" = "Unknown",
   "95" = "No Mother in Home",
   .default = "Unknown"))
+
+childhealthdata <- childhealthdata %>% mutate(ACECount = recode(ACEct_1920, 
+  "1" = "1",
+  "0" = "0",
+  "2" = "2",
+  "3" = "3",
+  "4" = "4",
+  "5" = "5",
+  "6" = "6",
+  "7" = "7",
+  "8" = "8",
+  "9" = "9",
+  "10" = "10",
+  "99" = "Missing"))
 ```
 
 ```{r creating new variables}
@@ -232,6 +244,21 @@ yesbehaviorprobsunder5 <- FiveAndUnder %>%
 yesbehaviorprobsALL <- childhealthdata %>%
   filter(behavior_1920 == "Yes")
 
+White <- childhealthdata %>%
+  filter(RaceCat == "White")
+
+Black <- childhealthdata %>%
+  filter(RaceCat == "Black")
+
+Asian <- childhealthdata %>%
+  filter(RaceCat == "Asian")
+
+Hispanic <- childhealthdata %>%
+  filter(RaceCat == "Hispanic")
+
+OtherRace <- childhealthdata %>%
+  filter(RaceCat == "Other")
+
 #creating new variables 
 
 flourishingunder5 <- FiveAndUnder %>% 
@@ -250,7 +277,6 @@ MissedCarebyState <- MissedNeededCare %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-MissedCarebyState
 
 ```
 
@@ -330,7 +356,28 @@ ggplot(childhealthdata) +
   geom_bar(aes(x = RaceCat, fill = NbhdSafe_1920))
 
 #^TRY SEPARATING THESE GRAPHS OUT
+
+ggplot(White) +
+  geom_bar(aes(x = RaceCat, fill = ChildHealthStatus))
+
+
 ```
+
+```{r race}
+#health status
+ggplot(White) +
+  geom_bar(aes(x = RaceCat, fill = ChildHealthStatus))
+ggplot(Black) +
+  geom_bar(aes(x = RaceCat, fill = ChildHealthStatus))
+ggplot(Hispanic) +
+  geom_bar(aes(x = RaceCat, fill = ChildHealthStatus))
+#^not noticable difference
+
+ggplot(White) +
+  geom_bar(aes(x = RaceCat, fill = FlourishStatus6to17), position = "dodge")
+
+```
+
 
 ```{r behavioral problems}
 
@@ -464,51 +511,53 @@ databyrace <- childhealthdata %>%
 
 ```
 
-```{r}
-#sorting out racial proportions
-library(tidycensus)
-load_variables(2019,'acs5',cache = TRUE)
+```{r esquisse graphs}
 
-get_acs(
-  variables = "B02001_008", geography = "us", survey = "acs5", year = 2020,
-)
+library(ggplot2)
 
-#weights: 
-#white - 0.7041715
-#black - 0.1262439
-#asian - 0.05640958
-#AI/AN - 0.008232905
-#HI/PA - 0.001872203
-#other - 0.1030699
-#hispanic - 0.1817716
+#Flourishing by ACE 
+ggplot(childhealthdata) +
+ aes(x = FlourishStatus6to17, fill = ACECount) +
+ geom_bar() +
+ scale_fill_manual(values = c(`0` = "#F8766D", 
+`1` = "#DD8A1D", `2` = "#78AC0A", `3` = "#0DB832", `4` = "#00BE79", `5` = "#00BEB7", 
+`6` = "#08B6E5", `7` = "#4FA1F9", `8` = "#A385FC", `9` = "#E46DEB", `10` = "#B59C00", Missing = "#FF61C3")) +
+ labs(x = "Flourishing Items Met", 
+ y = "Children", title = "\"Flourishing\" Status by ACE Count", subtitle = "Count of Children Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
+ caption = "Based on National Survey of Children's Health, 2019-2020") +
+ theme_minimal()
 
-databyrace
+#ACE by Race
 
-#all races = 326569308
-#white alone = 229960813 = 0.7041715
-#white in combo = 245105778 = 0.7505475
+ggplot(Black) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experiences: Black Children", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Black Children", caption = "Based on National Survey of Children's Health, 2019-2020")
 
-#black alone = 41227384 = 0.1262439
-#black in combo = 46273733 = 0.1416965
+ggplot(White) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: White Children", caption = "Based on National Survey of Children's Health, 2019-2020")
 
-#asian alone = 18421637 = 0.05640958
-#asian in combo = 22193536 = 0.06795965
+ggplot(Asian) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Asian Children", caption = "Based on National Survey of Children's Health, 2019-2020")
 
-#AI/AN alone = 2688614 = 0.008232905
-#AI/AN in combo = 5779818 = 0.0176986
+ggplot(Hispanic) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience",
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Hispanic Children", caption = "Based on National Survey of Children's Health, 2019-2020")
 
-#HI/PI alone = 611404  = 0.001872203
-#HI/PI in combo = 1441525 = 0.004414147
-
-#other race alone = 16783914 = 0.05139465
-#other two or more races = 16875542 = 0.05167522
-#other in combo = 24041125 = 0.07361722
-
-#hispanic or latino total = 59361020 = 0.1817716
-#not hispanic or latino = 267208288 =  0.8182284
-
-#not hispanic-white = 196251375 = 0.6009486
-#hipsanic white = 33709438 = 0.1032229
+ggplot(OtherRace) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience: Other Race", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race", caption = "Based on National Survey of Children's Health, 2019-2020")
 
 ```
 
