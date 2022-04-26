@@ -180,11 +180,11 @@ childhealthdata <- childhealthdata %>% mutate(NbhdSafe_1920 = recode(NbhdSafe_19
   "99" = "Unknown",
   .default = "Unknown"))
 
-childhealthdata <- childhealthdata %>% mutate(povlev4_1920 = recode(povlev4_1920, 
-  "1" = "0-99% FPL",
-  "2" = "100% FPL or greater",
-  "3" = "100% FPL or greater",
-  "4" = "100% FPL or greater",
+childhealthdata <- childhealthdata %>% mutate(povlevel = recode(povlev4_1920, 
+  "1" = "Less than 200% FPL",
+  "2" = "Less than 200% FPL",
+  "3" = "200% FPL or greater",
+  "4" = "200% FPL or greater",
   .default = "Unknown"))
 
 
@@ -262,10 +262,6 @@ OtherRace <- childhealthdata %>%
 
 #creating new variables 
 
-flourishingunder5 <- FiveAndUnder %>% 
-  group_by(FlourishStatus) %>% 
-  count() %>% arrange(desc(n)) %>%
-  rename("children" = n)
 
 flourishing6to17 <- childhealthdata %>% 
   group_by(FlourishStatus6to17) %>% 
@@ -283,12 +279,7 @@ MissedCarebyState <- MissedNeededCare %>%
 
 ## Visualizing 
 ```{r flourishing visual histogram}
-flourishplot0to5 <- ggplot(flourishingunder5, aes(x = FlourishStatus, y = children, fill = children)) +
-  geom_bar(stat = "identity") +
-  scale_fill_viridis_b(name="Number of Children") +
-  labs(title = "Frequency of 'Flourishing' Status in Children", x = "Frequency", y = "Number of Children")
 
-#not interesting - most sometimes or usually
 
 flourishplot6to17 <- ggplot(flourishing6to17, aes(x = FlourishStatus6to17, y = children, fill = children)) +
   geom_bar(stat = "identity") +
@@ -403,36 +394,48 @@ yesbehaviorprobsALL %>%
 ```
 
 ```{r variables by poverty}
-ggplot(FiveAndUnder) +
-  geom_bar(aes(x = povlev4_1920, fill = FlourishStatus), position = "dodge")
 
 #missed care by FPL
 carebypoverty <- MissedNeededCare %>% 
-  group_by(povlev4_1920) %>% 
+  group_by(povlevel) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-ggplot(carebypoverty, aes(x = povlev4_1920, y = children, fill = children)) +
+ggplot(carebypoverty, aes(x = povlevel, y = children, fill = children)) +
      geom_bar(stat = "identity") +
      scale_fill_viridis_b(name="Number of Children") +
-     labs(title = "Children who did not receive needed care by poverty level", x = "Frequency", y = "Number of Children")
+     labs(title = "Children Who Did not Receive Needed Care by Poverty Level", x = "Poverty Level", y = "Number of Children")
+
+#proportional missed care by poverty
+
+childhealthdata %>%
+ filter(!(WentWithoutCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = WentWithoutCare, fill = povlevel) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "cividis", 
+ direction = 1) +
+ labs(x = "Missed Out on Needed Care", y = "Proportion of Children", title = "Children Who Did Not Receive Needed Care by Poverty Level", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
+ theme_minimal()
+
 
 #behavior problem by FPL
 
 BehavbyPov <- yesbehaviorprobsALL %>% 
-  group_by(povlev4_1920) %>% 
+  group_by(povlevel) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
 BehavbyPovALL <- yesbehaviorprobsALL %>% 
-  group_by(povlev4_1920) %>% 
+  group_by(povlevel) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-ggplot(BehavbyPovALL, aes(x = povlev4_1920, y = children, fill = children)) +
+ggplot(BehavbyPovALL, aes(x = povlevel, y = children, fill = children)) +
      geom_bar(stat = "identity") +
      scale_fill_viridis_b(name="Number of Children") +
-     labs(title = "Children with behavioral problems by poverty level", x = "Frequency", y = "Number of Children")
+     labs(title = "Children with Behavioral Problems by Poverty Level", x = "Poverty Level", y = "Number of Children")
 
 ```
 
@@ -445,7 +448,7 @@ behaviorprobsALL <- childhealthdata %>%
   rename("children" = n)
 
 yesbehaviorprobsALL %>% 
-  group_by(povlev4_1920) %>% 
+  group_by(povlevel) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
@@ -468,7 +471,7 @@ ggplot(FiveAndUnder) +
   geom_bar(aes(x = ChildHealthStatus, fill = EmSupport_1920))
 
 ggplot(FiveAndUnder) +
-  geom_bar(aes(x = ChildHealthStatus, fill = povlev4_1920))
+  geom_bar(aes(x = ChildHealthStatus, fill = povlevel))
 
 
 ```
@@ -663,5 +666,10 @@ FlrishAsianWaffle <- c("0-1 Items" = 11.8, "2 Items" = 14.8, "All 3 Items" = 73.
 waffle(FlrishAsianWaffle, rows = 10,
        legend_pos = "bottom")
 
+#Poverty Waffle
+NJPovWaffle <- c("Less than 200% FPL" = 24.4, "200% FPL or Greater" = 75.6)
+
+waffle(NJPovWaffle, rows = 6,
+       legend_pos = "bottom")
 ```
 
