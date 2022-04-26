@@ -20,9 +20,6 @@ library(waffle)
 
 ```
 
-## R Markdown
-
-
 
 ```{r read in data}
 childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
@@ -231,6 +228,9 @@ childhealthdata <- childhealthdata %>% mutate(ACECount = recode(ACEct_1920,
 #filters
 FiveAndUnder <- childhealthdata %>%
   filter(Child.Age <= 5)
+
+NewJersey <- childhealthdata %>%
+  filter(State == "NJ")
 
 MissedNeededCare <- childhealthdata %>%
   filter(WentWithoutCare == "Yes")
@@ -559,5 +559,14 @@ ggplot(OtherRace) +
  labs(x = "Number of Adverse Childhood Experience: Other Race", 
  y = "Number of Children", title = "Adverse Childhood Experiences by Race", caption = "Based on National Survey of Children's Health, 2019-2020")
 
+```
+
+```{r waffles}
+# Vector
+RaceWaffle <- c(Hispanic = 55895, White = 5268, Asian = 3920, Black = 686)
+
+# Waffle chart
+waffle(RaceWaffle, rows = 8,
+       legend_pos = "bottom")
 ```
 
