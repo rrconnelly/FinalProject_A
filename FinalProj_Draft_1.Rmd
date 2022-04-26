@@ -232,6 +232,7 @@ FiveAndUnder <- childhealthdata %>%
 NewJersey <- childhealthdata %>%
   filter(State == "NJ")
 
+
 MissedNeededCare <- childhealthdata %>%
   filter(WentWithoutCare == "Yes")
 
@@ -527,6 +528,37 @@ ggplot(childhealthdata) +
  caption = "Based on National Survey of Children's Health, 2019-2020") +
  theme_minimal()
 
+#second flourishing by ace - "Stacked"
+
+dataforACEplot <- childhealthdata      
+
+dataforACEplot$ACECount <- factor(dataforACEplot$ACECount,  
+levels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Missing"))
+
+ggplot(dataforACEplot) +
+ aes(x = FlourishStatus6to17, fill = ACECount) +
+ geom_bar(position = "fill") +
+ scale_fill_hue(direction = 1) +
+ labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)", 
+ subtitle = "Count of Children Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+
+#Health by Ace stacked
+
+childhealthdata$ACECount <- factor(childhealthdata$ACECount,
+  levels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Missing"))
+
+ggplot(childhealthdata) +
+ aes(x = ChildHealthStatus, fill = ACECount) +
+ geom_bar(position = "fill") +
+ scale_fill_hue(direction = 1) +
+ labs(x = "Health Status", y = "Number of Children", title = "Overall Health Status & Adverse Childhood Experiences (ACE)", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+
 #ACE by Race
 
 ggplot(Black) +
@@ -559,14 +591,77 @@ ggplot(OtherRace) +
  labs(x = "Number of Adverse Childhood Experience: Other Race", 
  y = "Number of Children", title = "Adverse Childhood Experiences by Race", caption = "Based on National Survey of Children's Health, 2019-2020")
 
+#ACEbyRACE one plot 
+
+dataforACEplot$RaceCat <- factor(dataforACEplot$RaceCat,  
+levels = c("Asian", "Hispanic", "Other", "White", "Black", "Unknown"))
+
+dataforACEplot %>%
+ filter(!(RaceCat %in% "Unknown")) %>%
+ filter(!(ACECount %in% "Missing")) %>%
+ ggplot() +
+ aes(x = RaceCat, fill = ACECount) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+ labs(x = "Race", y = "Proportion of Children", title = "Adverse Childhood Experiences (ACE) by Race", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+
+
+#Insurance and needed care 
+childhealthdata$WentWithoutCare <- factor(childhealthdata$WentWithoutCare,
+  levels = c("No", "Yes", "Unknown"))
+
+#needed care by insurance status
+childhealthdata %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(WentWithoutCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = WentWithoutCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
+ fill = "Insured Status") +
+ theme_minimal()
+
+
 ```
 
 ```{r waffles}
-# Vector
-RaceWaffle <- c(Hispanic = 55895, White = 5268, Asian = 3920, Black = 686)
+# VectorWhite %>% count(ChildHealthStatus)
+WentWithoutWaffle <- c(Yes = 1, No = 44)
 
 # Waffle chart
-waffle(RaceWaffle, rows = 8,
+waffle(WentWithoutWaffle, rows = 5,
        legend_pos = "bottom")
+
+#waffles for Race and Health Status
+
+#WHITE
+FlrishWhiteWaffle <- c("0-1 Items" = 19.1, "2 Items" = 19.4, "All 3 Items" = 61.5)
+
+waffle(FlrishWhiteWaffle, rows = 10,
+       legend_pos = "bottom")
+#BLACK
+FlrishBlackWaffle <- c("0-1 Items" = 20, "2 Items" = 18.8, "All 3 Items" = 61.2)
+
+waffle(FlrishBlackWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#HISPANIC
+FlrishHispanicWaffle <- c("0-1 Items" = 16.8, "2 Items" = 19.6, "All 3 Items" = 63.6)
+
+waffle(FlrishHispanicWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#ASIAN
+FlrishAsianWaffle <- c("0-1 Items" = 11.8, "2 Items" = 14.8, "All 3 Items" = 73.4)
+
+waffle(FlrishAsianWaffle, rows = 10,
+       legend_pos = "bottom")
+
 ```
 
