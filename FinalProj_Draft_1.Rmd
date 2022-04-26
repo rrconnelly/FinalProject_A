@@ -232,6 +232,9 @@ FiveAndUnder <- childhealthdata %>%
 NewJersey <- childhealthdata %>%
   filter(State == "NJ")
 
+Poor <- childhealthdata %>%
+  filter(povlevel == "Less than 200% FPL")
+
 
 MissedNeededCare <- childhealthdata %>%
   filter(WentWithoutCare == "Yes")
@@ -419,6 +422,17 @@ childhealthdata %>%
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
  theme_minimal()
 
+#inNJ
+NewJersey %>%
+ filter(!(WentWithoutCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = WentWithoutCare, fill = povlevel) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "cividis", 
+ direction = 1) +
+ labs(x = "Missed Out on Needed Care", y = "Proportion of Children", title = "Children in NJ Who Did Not Receive Needed Care by Poverty Level", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
+ theme_minimal()
 
 #behavior problem by FPL
 
@@ -538,12 +552,16 @@ dataforACEplot <- childhealthdata
 dataforACEplot$ACECount <- factor(dataforACEplot$ACECount,  
 levels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Missing"))
 
-ggplot(dataforACEplot) +
+dataforACEplot %>% 
+  filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
+  filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
+  filter(!(ACECount %in% "Missing")) %>%
+ggplot() +
  aes(x = FlourishStatus6to17, fill = ACECount) +
  geom_bar(position = "fill") +
  scale_fill_hue(direction = 1) +
- labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)", 
- subtitle = "Count of Children Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
+ labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
+ subtitle = "Count of Children in the US Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
  theme_minimal()
 
@@ -553,14 +571,31 @@ ggplot(dataforACEplot) +
 childhealthdata$ACECount <- factor(childhealthdata$ACECount,
   levels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Missing"))
 
-ggplot(childhealthdata) +
+childhealthdata %>%
+  filter(!(ChildHealthStatus %in% "Unknown")) %>%
+  filter(!(ACECount %in% "Missing")) %>%
+ggplot() +
+ aes(x = ChildHealthStatus, fill = ACECount) +
+ geom_bar(position = "fill") +
+ scale_fill_hue(direction = 1) +
+ labs(x = "Health Status", y = "Number of Children", title = "Overall Health Status & Adverse Childhood Experiences (ACE) in the US", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+#inNJ
+NewJersey$ACECount <- factor(NewJersey$ACECount,
+  levels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Missing"))
+
+NewJersey %>%
+  filter(!(ChildHealthStatus %in% "Unknown")) %>%
+  filter(!(ACECount %in% "Missing")) %>%
+ggplot() +
  aes(x = ChildHealthStatus, fill = ACECount) +
  geom_bar(position = "fill") +
  scale_fill_hue(direction = 1) +
  labs(x = "Health Status", y = "Number of Children", title = "Overall Health Status & Adverse Childhood Experiences (ACE)", 
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
  theme_minimal()
-
 
 #ACE by Race
 
@@ -607,7 +642,7 @@ dataforACEplot %>%
  geom_bar(position = "fill") +
  scale_fill_viridis_d(option = "viridis", 
  direction = 1) +
- labs(x = "Race", y = "Proportion of Children", title = "Adverse Childhood Experiences (ACE) by Race", 
+ labs(x = "Race", y = "Proportion of Children", title = "Adverse Childhood Experiences (ACE) by Race in the US", 
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
  theme_minimal()
 
@@ -627,6 +662,19 @@ childhealthdata %>%
  scale_fill_viridis_d(option = "viridis", direction = 1) +
  labs(x = "Whether Child Missed out on Needed Care", 
  y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
+ fill = "Insured Status") +
+ theme_minimal()
+
+#inNJ
+NewJersey %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(WentWithoutCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = WentWithoutCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children in New Jersey Receiving Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020",
  fill = "Insured Status") +
  theme_minimal()
 
@@ -669,7 +717,41 @@ waffle(FlrishAsianWaffle, rows = 10,
 #Poverty Waffle
 NJPovWaffle <- c("Less than 200% FPL" = 24.4, "200% FPL or Greater" = 75.6)
 
-waffle(NJPovWaffle, rows = 6,
+waffle(NJPovWaffle, rows = 10,
        legend_pos = "bottom")
+
+#neededcare 
+
+NJCareWaffle <- c("Missed Out on Needed Care" = 2.2, "Received or Did Not Need Care" = 97.8)
+
+waffle(NJCareWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#uninsuredpoverty
+#proportion of poor uninsured
+
+NJpoor <- NewJersey %>%
+  filter(povlevel == "Less than 200% FPL")
+
+NJInsPovWaffle <- c("Insured" = 87, "Not Consistently Insured" = 13)
+
+waffle(NJInsPovWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#plot showing over 50% of poor are uninsured 
+
+NewJersey %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = InsGap_1920, fill = povlevel) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+ labs(x = "Insurance Status", y = "Percentage", title = "Insurance Status and Poverty Level in New Jersey", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
+ coord_flip() +
+ theme_minimal()
+
+
 ```
 
