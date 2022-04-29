@@ -43,7 +43,7 @@ childhealthdata <- childhealthdata %>% mutate(RaceCat = recode(Race,
   "99" = "Unknown",
   .default = "Unknown"))
 
-#health staus
+#health status
 
 childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHealthStatus_1920, 
   "1" = "Excellent or Very Good",
@@ -51,8 +51,16 @@ childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHe
   "3" = "Fair or Poor",
   "99" = "Unknown",
   .default = "Unknown"))
-
-factor_ChildHealthStatus <- factor(ChildHealthStatus, order = TRUE, levels = c("Fair or Poor", "Good", "Excellent or Very Good", "Unknown") )
+  
+dply::mutate(childhealthdata,
+          ChildHealthStatus = 
+          dplyr::recode_factor(ChildHealthStatus_1920, 
+  "1" = "Excellent or Very Good",
+  "2" = "Good",
+  "3" = "Fair or Poor",
+  "99" = "Unknown",
+  .ordered = TRUE,
+  .default = "Unknown"))
 
 #sex
 
@@ -196,5 +204,23 @@ Hispanic <- childhealthdata %>%
 
 OtherRace <- childhealthdata %>%
   filter(RaceCat == "Other")
+
+#creating new variables 
+
+flourishing6to17 <- childhealthdata %>% 
+  group_by(FlourishStatus6to17) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+MissedCarebyState <- MissedNeededCare %>%
+  group_by(State) %>%
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+```
+
+##Visualizing 
+
+```{r}
+
 ```
 
