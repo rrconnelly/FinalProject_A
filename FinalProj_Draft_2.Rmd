@@ -8,6 +8,7 @@ author: Rebecca Connelly
 library(tidyverse)
 library(DataExplorer)
 library(esquisse)
+library(ggplot2)
 library(plotly)
 library(sf)
 library(devtools)
@@ -167,7 +168,7 @@ childhealthdata <- childhealthdata %>% mutate(MotherMH = recode_factor(MotherMH_
 #ACEct_1920 - NOT making categorical 
 ```
 
-```{r creating new variables}
+```{r creating new variables: filters}
 #filters
 FiveAndUnder <- childhealthdata %>%
   filter(Child.Age <= 5)
@@ -202,6 +203,10 @@ Hispanic <- childhealthdata %>%
 OtherRace <- childhealthdata %>%
   filter(RaceCat == "Other")
 
+```
+
+```{r new variables: grouped}
+
 #creating new variables 
 
 flourishing6to17 <- childhealthdata %>% 
@@ -213,11 +218,64 @@ MissedCarebyState <- MissedNeededCare %>%
   group_by(State.FIPS.Code) %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
+
+uninsured <- childhealthdata %>%
+  filter(InsGap_1920 == "Periods Uninsured")
+
+uninsuredgrouped <- uninsured %>% 
+  group_by(RaceCat) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+databyrace <- childhealthdata %>% 
+  group_by(RaceCat) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
 ```
+
 
 ##Visualizing 
 
-```{r}
+```{r missed needed care}
+#missed needed care by povery level 
 
+childhealthdata %>%
+ filter(!(ForegoneCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = ForegoneCare, fill = povlevel) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "cividis", 
+ direction = 1) +
+ labs(x = "Missed Out on Needed Care", y = "Proportion of Children", title = "Children Who Did Not Receive Needed Care by Poverty Level", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
+ theme_minimal()
+
+#inNJ
+NewJersey %>%
+ filter(!(ForegoneCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = ForegoneCare, fill = povlevelgrouped) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "cividis", 
+ direction = 1) +
+ labs(x = "Missed Out on Needed Care", y = "Proportion of Children", title = "Children in NJ Who Did Not Receive Needed Care by Poverty Level", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
+ theme_minimal()
+```
+
+```{r ACES}
+childhealthdata %>% 
+  filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
+  filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
+  filter(!(ACEct_1920 %in% "Missing")) %>%
+ggplot() +
+ aes(x = FlourishStatus6to17, fill = ACEct_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_hue(direction = 1) +
+ labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
+ subtitle = "Count of Children in the US Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+#^ prior ACE visual, but didn't make ACE factors. not working right 
 ```
 
