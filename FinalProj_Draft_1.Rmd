@@ -50,6 +50,8 @@ childhealthdata <- childhealthdata %>% mutate(RaceCat = recode(Race,
 
 childhealthdata$ChildHealthStatus_1920 = as.factor(childhealthdata$ChildHealthStatus_1920) # converting to categorical
 
+factor_ChildHealthStatus_1920 <- factor(ChildHealthStatus_1920, order = TRUE, levels = c("Fair or Poor", "Good", "Excellent or Very Good") )
+
 childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHealthStatus_1920, 
   "1" = "Excellent or Very Good",
   "2" = "Good",
@@ -234,7 +236,6 @@ NewJersey <- childhealthdata %>%
 
 Poor <- childhealthdata %>%
   filter(povlevel == "Less than 200% FPL")
-
 
 MissedNeededCare <- childhealthdata %>%
   filter(WentWithoutCare == "Yes")

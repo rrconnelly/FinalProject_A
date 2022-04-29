@@ -1,0 +1,200 @@
+---
+title: "FinalProj_Draft_2"
+output: html_document
+author: Rebecca Connelly
+---
+
+```{r setup}
+library(tidyverse)
+library(DataExplorer)
+library(esquisse)
+library(plotly)
+library(sf)
+library(devtools)
+library(usmapdata)
+library(usmap)
+library(ggplot2)
+library(maps)
+library(waffle)
+
+```
+
+
+
+```{r read in data}
+childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
+
+names(childhealthdata) <- make.names(names(childhealthdata), unique=TRUE)
+```
+
+
+
+```{r editing variables}
+#race 
+
+childhealthdata$Race = as.factor(childhealthdata$Race) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(RaceCat = recode(Race, 
+  "1" = "Hispanic",
+  "2" = "White",
+  "3" = "Black",
+  "4" = "Asian",
+  "5" = "Other",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+#health staus
+
+childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHealthStatus_1920, 
+  "1" = "Excellent or Very Good",
+  "2" = "Good",
+  "3" = "Fair or Poor",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+factor_ChildHealthStatus <- factor(ChildHealthStatus, order = TRUE, levels = c("Fair or Poor", "Good", "Excellent or Very Good", "Unknown") )
+
+#sex
+
+childhealthdata$Sex1920 = as.factor(childhealthdata$Sex1920) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(Sex = recode(Sex1920, 
+  "1" = "Male",
+  "2" = "Female",
+  "99" = "Missing",
+  .default = "Missing"))
+
+#flourishing status 
+
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus0to5 = recode(flrish0to5_1920, 
+  "1" = "Meets 0-2 Items",
+  "2" = "Meets 3 Items",
+  "3" = "Meets all 4 Items",
+  "4" = "Never",
+  "90" = "NA, Over 5",
+"95" =  "NA, under 6m",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+factor_FlourishStatus0to5 <- factor(FlourishStatus0to5, order = TRUE, levels = c("Meets 0-2 Items", "Meets 3 Items", "Meets all 4 Items", "NA, Over 5", "NA, under 6m", "Unknown") )
+
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus6to17 = recode(flrish6to17_1920, 
+  "1" = "Meets 0-1 Items",
+  "2" = "Meets 2 Items",
+  "3" = "Meets all 3 Items",
+  "90" = "NA, Under 5",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+factor_FlourishStatus6to17 <- factor(FlourishStatus6to17, order = TRUE, levels = c("Meets 0-1 Items", "Meets 2 Items", "Meets all 3 Items", "NA, Under 5", "Unknown") )
+
+#forgoing care
+
+childhealthdata$ForgoneCare_1920 = as.factor(childhealthdata$ForgoneCare_1920) # converting to categorical
+
+childhealthdata <- childhealthdata %>% mutate(WentWithoutCare = recode(ForgoneCare_1920, 
+  "1" = "Yes",
+  "2" = "No",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+#behavioral probs 
+
+childhealthdata <- childhealthdata %>% mutate(behavior_1920 = recode(behavior_1920, 
+  "1" = "No",
+  "2" = "Used to",
+  "3" = "Yes",
+  "99" = "Unknown",
+  "96" = "NA Under 3",
+  .default = "Unknown"))
+
+#neighborhood safe
+
+childhealthdata <- childhealthdata %>% mutate(NbhdSafe = recode(NbhdSafe_1920, 
+  "1" = "Definitely Agree",
+  "2" = "Somewhat Agree",
+  "3" = "Disagree",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+factor_NbhdSafe <- factor(NbhdSafe, order = TRUE, levels = c("Disagree", "Somewhat Agree", "Definitely Agree", "Unknown") )
+
+#poverty level
+
+childhealthdata <- childhealthdata %>% mutate(povlevel = recode(povlev4_1920, 
+  "1" = "Less than 200% FPL",
+  "2" = "Less than 200% FPL",
+  "3" = "200% FPL or greater",
+  "4" = "200% FPL or greater",
+  .default = "Unknown"))
+
+#emotional support 
+
+childhealthdata <- childhealthdata %>% mutate(EmSupport_1920 = recode(EmSupport_1920, 
+  "1" = "Yes",
+  "2" = "No",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+#insured 
+
+childhealthdata <- childhealthdata %>% mutate(InsGap_1920 = recode(InsGap_1920, 
+  "1" = "Consistently Insured",
+  "2" = "Uninsured or periods without coverage",
+  "99" = "Unknown",
+  .default = "Unknown"))
+
+#mothers mental health
+
+childhealthdata <- childhealthdata %>% mutate(MotherMH = recode(MotherMH_1920, 
+  "1" = "Excellent or Very Good",
+  "2" = "Good",
+  "3" = "Fair or Poor",
+  "99" = "Unknown",
+  "95" = "No Mother in Home",
+  .default = "Unknown"))
+
+factor_MotherMH <- factor(MotherMH, order = TRUE, levels = c("Fair or Poor", "Good", "Excellent or Very Good", "Unknown") )
+
+#ACEct_1920 - NOT making categorical 
+```
+
+```{r creating new variables}
+#filters
+FiveAndUnder <- childhealthdata %>%
+  filter(Child.Age <= 5)
+
+NewJersey <- childhealthdata %>%
+  filter(State == "NJ")
+
+Poor <- childhealthdata %>%
+  filter(povlevel == "Less than 200% FPL")
+
+MissedNeededCare <- childhealthdata %>%
+  filter(WentWithoutCare == "Yes")
+
+parentEmoSup <- childhealthdata %>%
+  filter(SomeoneEmoSup == 1)
+
+yesbehaviorprobsunder5 <- FiveAndUnder %>%
+  filter(behavior_1920 == "Yes")
+
+yesbehaviorprobsALL <- childhealthdata %>%
+  filter(behavior_1920 == "Yes")
+
+White <- childhealthdata %>%
+  filter(RaceCat == "White")
+
+Black <- childhealthdata %>%
+  filter(RaceCat == "Black")
+
+Asian <- childhealthdata %>%
+  filter(RaceCat == "Asian")
+
+Hispanic <- childhealthdata %>%
+  filter(RaceCat == "Hispanic")
+
+OtherRace <- childhealthdata %>%
+  filter(RaceCat == "Other")
+```
+
