@@ -44,20 +44,13 @@ childhealthdata <- childhealthdata %>% mutate(RaceCat = recode(Race,
   .default = "Unknown"))
 
 #health status
-
-childhealthdata <- childhealthdata %>% mutate(ChildHealthStatus = recode(ChildHealthStatus_1920, 
-  "1" = "Excellent or Very Good",
-  "2" = "Good",
-  "3" = "Fair or Poor",
-  "99" = "Unknown",
-  .default = "Unknown"))
   
-dply::mutate(childhealthdata,
+childhealthdata <- mutate(childhealthdata,
           ChildHealthStatus = 
-          dplyr::recode_factor(ChildHealthStatus_1920, 
-  "1" = "Excellent or Very Good",
-  "2" = "Good",
+          recode_factor(ChildHealthStatus_1920, 
   "3" = "Fair or Poor",
+  "2" = "Good",
+  "1" = "Excellent or Very Good",
   "99" = "Unknown",
   .ordered = TRUE,
   .default = "Unknown"))
@@ -74,7 +67,7 @@ childhealthdata <- childhealthdata %>% mutate(Sex = recode(Sex1920,
 
 #flourishing status 
 
-childhealthdata <- childhealthdata %>% mutate(FlourishStatus0to5 = recode(flrish0to5_1920, 
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus0to5 = recode_factor(flrish0to5_1920, 
   "1" = "Meets 0-2 Items",
   "2" = "Meets 3 Items",
   "3" = "Meets all 4 Items",
@@ -82,63 +75,70 @@ childhealthdata <- childhealthdata %>% mutate(FlourishStatus0to5 = recode(flrish
   "90" = "NA, Over 5",
 "95" =  "NA, under 6m",
   "99" = "Unknown",
+  .ordered = TRUE,
   .default = "Unknown"))
 
-factor_FlourishStatus0to5 <- factor(FlourishStatus0to5, order = TRUE, levels = c("Meets 0-2 Items", "Meets 3 Items", "Meets all 4 Items", "NA, Over 5", "NA, under 6m", "Unknown") )
 
-childhealthdata <- childhealthdata %>% mutate(FlourishStatus6to17 = recode(flrish6to17_1920, 
+childhealthdata <- childhealthdata %>% mutate(FlourishStatus6to17 = recode_factor(flrish6to17_1920, 
   "1" = "Meets 0-1 Items",
   "2" = "Meets 2 Items",
   "3" = "Meets all 3 Items",
   "90" = "NA, Under 5",
   "99" = "Unknown",
+  .ordered = TRUE,
   .default = "Unknown"))
-
-factor_FlourishStatus6to17 <- factor(FlourishStatus6to17, order = TRUE, levels = c("Meets 0-1 Items", "Meets 2 Items", "Meets all 3 Items", "NA, Under 5", "Unknown") )
 
 #forgoing care
 
 childhealthdata$ForgoneCare_1920 = as.factor(childhealthdata$ForgoneCare_1920) # converting to categorical
 
-childhealthdata <- childhealthdata %>% mutate(WentWithoutCare = recode(ForgoneCare_1920, 
-  "1" = "Yes",
-  "2" = "No",
+childhealthdata <- childhealthdata %>% mutate(ForegoneCare = recode_factor(ForgoneCare_1920, 
+  "1" = "Went Without",
+  "2" = "Received Need Care",
   "99" = "Unknown",
   .default = "Unknown"))
 
 #behavioral probs 
 
-childhealthdata <- childhealthdata %>% mutate(behavior_1920 = recode(behavior_1920, 
+childhealthdata <- childhealthdata %>% mutate(behaviorprob = recode_factor(behavior_1920, 
   "1" = "No",
   "2" = "Used to",
   "3" = "Yes",
   "99" = "Unknown",
   "96" = "NA Under 3",
+  .ordered = TRUE,
   .default = "Unknown"))
 
 #neighborhood safe
 
-childhealthdata <- childhealthdata %>% mutate(NbhdSafe = recode(NbhdSafe_1920, 
-  "1" = "Definitely Agree",
-  "2" = "Somewhat Agree",
+childhealthdata <- childhealthdata %>% mutate(NbhdSafe = recode_factor(NbhdSafe_1920,
   "3" = "Disagree",
+  "2" = "Somewhat Agree",
+  "1" = "Definitely Agree",
   "99" = "Unknown",
+  .ordered = TRUE,
   .default = "Unknown"))
-
-factor_NbhdSafe <- factor(NbhdSafe, order = TRUE, levels = c("Disagree", "Somewhat Agree", "Definitely Agree", "Unknown") )
 
 #poverty level
 
-childhealthdata <- childhealthdata %>% mutate(povlevel = recode(povlev4_1920, 
-  "1" = "Less than 200% FPL",
-  "2" = "Less than 200% FPL",
-  "3" = "200% FPL or greater",
-  "4" = "200% FPL or greater",
+childhealthdata <- childhealthdata %>% mutate(povlevel = recode_factor(povlev4_1920, 
+  "1" = "Below 100% FPL",
+  "2" = "100-199% FPL",
+  "3" = "200-399% FPL",
+  "4" = "Greater than 400% FPL",
+  .ordered = TRUE,
+  .default = "Unknown"))
+
+childhealthdata <- childhealthdata %>% mutate(povlevelgrouped = recode(povlev4_1920, 
+  "1" = "Below 200% FPL",
+  "2" = "Below 200% FPL",
+  "3" = "200% or above FPL",
+  "4" = "200% or above FPL",
   .default = "Unknown"))
 
 #emotional support 
 
-childhealthdata <- childhealthdata %>% mutate(EmSupport_1920 = recode(EmSupport_1920, 
+childhealthdata <- childhealthdata %>% mutate(EmSupport_1920 = recode_factor(EmSupport_1920,
   "1" = "Yes",
   "2" = "No",
   "99" = "Unknown",
@@ -147,22 +147,22 @@ childhealthdata <- childhealthdata %>% mutate(EmSupport_1920 = recode(EmSupport_
 #insured 
 
 childhealthdata <- childhealthdata %>% mutate(InsGap_1920 = recode(InsGap_1920, 
-  "1" = "Consistently Insured",
-  "2" = "Uninsured or periods without coverage",
+  "1" = "Insured",
+  "2" = "Periods Uninsured",
   "99" = "Unknown",
   .default = "Unknown"))
 
 #mothers mental health
 
-childhealthdata <- childhealthdata %>% mutate(MotherMH = recode(MotherMH_1920, 
+childhealthdata <- childhealthdata %>% mutate(MotherMH = recode_factor(MotherMH_1920,
   "1" = "Excellent or Very Good",
   "2" = "Good",
   "3" = "Fair or Poor",
   "99" = "Unknown",
   "95" = "No Mother in Home",
+  .ordered = TRUE,
   .default = "Unknown"))
 
-factor_MotherMH <- factor(MotherMH, order = TRUE, levels = c("Fair or Poor", "Good", "Excellent or Very Good", "Unknown") )
 
 #ACEct_1920 - NOT making categorical 
 ```
@@ -173,19 +173,16 @@ FiveAndUnder <- childhealthdata %>%
   filter(Child.Age <= 5)
 
 NewJersey <- childhealthdata %>%
-  filter(State == "NJ")
+  filter(State.FIPS.Code == "34")
 
 Poor <- childhealthdata %>%
   filter(povlevel == "Less than 200% FPL")
 
 MissedNeededCare <- childhealthdata %>%
-  filter(WentWithoutCare == "Yes")
+  filter(ForegoneCare == "Yes")
 
 parentEmoSup <- childhealthdata %>%
   filter(SomeoneEmoSup == 1)
-
-yesbehaviorprobsunder5 <- FiveAndUnder %>%
-  filter(behavior_1920 == "Yes")
 
 yesbehaviorprobsALL <- childhealthdata %>%
   filter(behavior_1920 == "Yes")
@@ -213,7 +210,7 @@ flourishing6to17 <- childhealthdata %>%
   rename("children" = n)
 
 MissedCarebyState <- MissedNeededCare %>%
-  group_by(State) %>%
+  group_by(State.FIPS.Code) %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 ```
