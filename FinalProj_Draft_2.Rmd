@@ -277,5 +277,186 @@ ggplot() +
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
  theme_minimal()
 #^ prior ACE visual, but didn't make ACE factors. not working right 
+
+#inNJ
+NewJersey$ACECount <- factor(NewJersey$ACECount,
+  levels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Missing"))
+
+NewJersey %>%
+  filter(!(ChildHealthStatus %in% "Unknown")) %>%
+  filter(!(ACECount %in% "Missing")) %>%
+ggplot() +
+ aes(x = ChildHealthStatus, fill = ACECount) +
+ geom_bar(position = "fill") +
+ scale_fill_hue(direction = 1) +
+ labs(x = "Health Status", y = "Number of Children", title = "Overall Health Status & Adverse Childhood Experiences (ACE)", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+#ACE by Race
+
+ggplot(Black) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experiences: Black Children", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Black Children", caption = "Based on National Survey of Children's Health, 2019-2020")
+
+ggplot(White) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: White Children", caption = "Based on National Survey of Children's Health, 2019-2020")
+
+ggplot(Asian) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Asian Children", caption = "Based on National Survey of Children's Health, 2019-2020")
+
+ggplot(Hispanic) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience",
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Hispanic Children", caption = "Based on National Survey of Children's Health, 2019-2020")
+
+ggplot(OtherRace) +
+ aes(x = ACECount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experience: Other Race", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race", caption = "Based on National Survey of Children's Health, 2019-2020")
+
+#ACEbyRACE one plot 
+
+dataforACEplot$RaceCat <- factor(dataforACEplot$RaceCat,  
+levels = c("Asian", "Hispanic", "Other", "White", "Black", "Unknown"))
+
+dataforACEplot %>%
+ filter(!(RaceCat %in% "Unknown")) %>%
+ filter(!(ACECount %in% "Missing")) %>%
+ ggplot() +
+ aes(x = RaceCat, fill = ACECount) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+ labs(x = "Race", y = "Proportion of Children", title = "Adverse Childhood Experiences (ACE) by Race in the US", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+```
+
+```{r insurance}
+#Insurance and needed care 
+childhealthdata$WentWithoutCare <- factor(childhealthdata$WentWithoutCare,
+  levels = c("No", "Yes", "Unknown"))
+
+#needed care by insurance status
+childhealthdata %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(WentWithoutCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = WentWithoutCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
+ fill = "Insured Status") +
+ theme_minimal()
+
+#inNJ
+NewJersey %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(WentWithoutCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = WentWithoutCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children in New Jersey Receiving Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020",
+ fill = "Insured Status") +
+ theme_minimal()
+
+#plot showing over 50% of poor are uninsured 
+
+NewJersey %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = InsGap_1920, fill = povlevel) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+ labs(x = "Insurance Status", y = "Percentage", title = "Insurance Status and Poverty Level in New Jersey", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
+ coord_flip() +
+ theme_minimal()
+```
+
+```{r}
+# VectorWhite %>% count(ChildHealthStatus)
+WentWithoutWaffle <- c(Yes = 1, No = 44)
+
+# Waffle chart
+waffle(WentWithoutWaffle, rows = 5,
+       legend_pos = "bottom")
+
+#waffles for Race and Health Status
+
+#WHITE
+FlrishWhiteWaffle <- c("0-1 Items" = 19.1, "2 Items" = 19.4, "All 3 Items" = 61.5)
+
+waffle(FlrishWhiteWaffle, rows = 10,
+       legend_pos = "bottom")
+#BLACK
+FlrishBlackWaffle <- c("0-1 Items" = 20, "2 Items" = 18.8, "All 3 Items" = 61.2)
+
+waffle(FlrishBlackWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#HISPANIC
+FlrishHispanicWaffle <- c("0-1 Items" = 16.8, "2 Items" = 19.6, "All 3 Items" = 63.6)
+
+waffle(FlrishHispanicWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#ASIAN
+FlrishAsianWaffle <- c("0-1 Items" = 11.8, "2 Items" = 14.8, "All 3 Items" = 73.4)
+
+waffle(FlrishAsianWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#Poverty Waffle
+NJPovWaffle <- c("Less than 200% FPL" = 24.4, "200% FPL or Greater" = 75.6)
+
+waffle(NJPovWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#neededcare 
+
+NJCareWaffle <- c("Missed Out on Needed Care" = 2.2, "Received or Did Not Need Care" = 97.8)
+
+waffle(NJCareWaffle, rows = 10,
+       legend_pos = "bottom")
+
+#uninsuredpoverty
+#proportion of poor uninsured
+
+NJpoor <- NewJersey %>%
+  filter(povlevel == "Less than 200% FPL")
+
+NJInsPovWaffle <- c("Insured" = 87, "Not Consistently Insured" = 13)
+
+waffle(NJInsPovWaffle, rows = 10,
+       legend_pos = "bottom")
+
+
+```
+
+
+```{r}
+#exploring scatter 
+ggplot(childhealthdata) + # data
+  aes(x = ACEct_1920, y = FlourishStatus6to17) + # variables
+  geom_point()
+#^still looks like a line 
+
 ```
 
