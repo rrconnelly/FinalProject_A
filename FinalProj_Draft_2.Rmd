@@ -28,8 +28,6 @@ childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019
 names(childhealthdata) <- make.names(names(childhealthdata), unique=TRUE)
 ```
 
-
-
 ```{r editing variables}
 #race 
 
