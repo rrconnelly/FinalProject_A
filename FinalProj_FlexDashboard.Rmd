@@ -1,7 +1,8 @@
 ---
 title: "Final Project"
+runtime: shiny
 output: 
-  flexdashboard::flex_dashboard:
+    flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
 ---
