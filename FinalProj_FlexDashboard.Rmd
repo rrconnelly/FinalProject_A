@@ -1,36 +1,129 @@
 ---
-title: "Untitled"
+title: "Final Project"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
 ---
+Demographics
+===================================== 
+
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(tidyverse)
+library(DataExplorer)
+library(ggplot2)
+library(plotly)
+library(devtools)
+library(waffle)
+
+# read in data 
+childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/FinalDataforSubmission.csv")
+
+#adding filtered variables 
+NewJersey <- childhealthdata %>%
+  filter(State.FIPS.Code == "34")
+
+Poor <- childhealthdata %>%
+  filter(povlevel == "Less than 200% FPL")
+
+MissedNeededCare <- childhealthdata %>%
+  filter(ForegoneCare == "Yes")
+
+parentEmoSup <- childhealthdata %>%
+  filter(SomeoneEmoSup == 1)
+
+yesbehaviorprobsALL <- childhealthdata %>%
+  filter(behavior_1920 == "Yes")
+
+White <- childhealthdata %>%
+  filter(RaceCat == "White")
+
+Black <- childhealthdata %>%
+  filter(RaceCat == "Black")
+
+Asian <- childhealthdata %>%
+  filter(RaceCat == "Asian")
+
+Hispanic <- childhealthdata %>%
+  filter(RaceCat == "Hispanic")
+
+OtherRace <- childhealthdata %>%
+  filter(RaceCat == "Other")
+
 ```
 
-Column {data-width=650}
+
+Accessing Care
+=====================================
+
+Insurance Status 
 -----------------------------------------------------------------------
 
-### Chart A
+### Insurance Status
 
-```{r}
+```{r insurance status}
+HlthStatusIns <- ggplot(childhealthdata) +
+  geom_bar(aes(x = ChildHealthStatus, fill = InsGap_1920))
 
+ggplotly(HlthStatusIns)
 ```
 
-Column {data-width=350}
+Needed Care
 -----------------------------------------------------------------------
 
-### Chart B
+### Needed Care
 
-```{r}
+```{r care insurance}
+#insured status by received care
+CareInsChart <- childhealthdata %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(ForegoneCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = ForegoneCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
+ fill = "Insured Status") +
+ theme_minimal()
 
+ggplotly(CareInsChart)
 ```
 
-### Chart C
+Experiences and Wellbeing
+=====================================
 
-```{r}
+ACEs by Race {data-width=650}
+-----------------------------------------------------------------------
 
+### ACEs - Black Population
+```{r ACEs Black}
+ACEsBlackPlot <- ggplot(Black) +
+ aes(x = AceCount) +
+ geom_bar(fill = "#B22222") +
+ labs(x = "Number of Adverse Childhood Experiences: Black Children", 
+ y = "Number of Children", title = "Adverse Childhood Experiences by Race: Black Children", caption = "Based on National Survey of Children's Health, 2019-2020")
+
+ggplotly(ACEsBlackPlot)
+```
+
+### ACEs and Flourishing Status
+```{r ACE and Flourish}
+FlrshAcePlot <- childhealthdata %>% 
+  filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
+  filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
+  filter(!(AceCount %in% "Missing")) %>%
+ggplot() +
+ aes(x = FlourishStatus6to17, fill = AceCount) +
+ geom_bar(position = "fill") +
+ scale_fill_hue(direction = 1) +
+ labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
+ subtitle = "Count of Children in the US Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
+
+ggplotly(FlrshAcePlot)
 ```
 

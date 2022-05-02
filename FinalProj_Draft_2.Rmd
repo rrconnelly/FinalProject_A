@@ -21,7 +21,6 @@ library(waffle)
 ```
 
 
-
 ```{r read in data}
 childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/ChildHealthData_Edited_1920_ONLY.csv")
 
@@ -162,6 +161,21 @@ childhealthdata <- childhealthdata %>% mutate(MotherMH = recode_factor(MotherMH_
   .ordered = TRUE,
   .default = "Unknown"))
 
+childhealthdata <- childhealthdata %>% mutate(AceCount = recode_factor(ACEct_1920,
+  "0" = "0",
+  "1" = "1",
+  "2" = "2",
+  "3" = "3",
+  "4" = "4",
+  "5" = "5",
+  "6" = "6", 
+  "&" = "7",
+  "8" = "8",
+  "9" = "9",
+  "10" = "10",
+  "99" = "Missing",
+  .ordered = TRUE,
+  .default = "Unknown"))
 
 #ACEct_1920 - NOT making categorical 
 ```
@@ -265,9 +279,9 @@ NewJersey %>%
 childhealthdata %>% 
   filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
   filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
-  filter(!(ACEct_1920 %in% "Missing")) %>%
+  filter(!(AceCount %in% "Missing")) %>%
 ggplot() +
- aes(x = FlourishStatus6to17, fill = ACEct_1920) +
+ aes(x = FlourishStatus6to17, fill = AceCount) +
  geom_bar(position = "fill") +
  scale_fill_hue(direction = 1) +
  labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
@@ -294,7 +308,7 @@ ggplot() +
 #ACE by Race
 
 ggplot(Black) +
- aes(x = ACECount) +
+ aes(x = AceCount) +
  geom_bar(fill = "#B22222") +
  labs(x = "Number of Adverse Childhood Experiences: Black Children", 
  y = "Number of Children", title = "Adverse Childhood Experiences by Race: Black Children", caption = "Based on National Survey of Children's Health, 2019-2020")
@@ -318,7 +332,7 @@ ggplot(Hispanic) +
  y = "Number of Children", title = "Adverse Childhood Experiences by Race: Hispanic Children", caption = "Based on National Survey of Children's Health, 2019-2020")
 
 ggplot(OtherRace) +
- aes(x = ACECount) +
+ aes(x = ACEct_1920) +
  geom_bar(fill = "#B22222") +
  labs(x = "Number of Adverse Childhood Experience: Other Race", 
  y = "Number of Children", title = "Adverse Childhood Experiences by Race", caption = "Based on National Survey of Children's Health, 2019-2020")
