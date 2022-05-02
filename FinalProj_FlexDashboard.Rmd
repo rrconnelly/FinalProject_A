@@ -1,10 +1,12 @@
 ---
 title: "Final Project"
 runtime: shiny
-output: 
-    flexdashboard::flex_dashboard:
-    orientation: columns
-    vertical_layout: fill
+output:
+  flexdashboard::flex_dashboard: null
+  orientation: columns
+  vertical_layout: fill
+resource_files:
+- FinalDataforSubmission.csv
 ---
 Demographics
 ===================================== 
@@ -21,7 +23,9 @@ library(waffle)
 library(rsconnect)
 
 # read in data 
-childhealthdata <- read_csv("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/FinalDataforSubmission.csv")
+childhealthdata <- read_csv("FinalDataforSubmission.csv")
+
+#("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/FinalDataforSubmission.csv")
 
 #adding filtered variables 
 NewJersey <- childhealthdata %>%

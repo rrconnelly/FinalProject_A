@@ -1,0 +1,13 @@
+name: TestPublish1A
+title: TestPublish1A
+username:
+account: rebeccarconnelly
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6218135
+bundleId: 5862018
+url: https://rebeccarconnelly.shinyapps.io/TestPublish1A/
+when: 1651523891.76331
+lastSyncTime: 1651523891.76331
+asMultiple: FALSE
+asStatic: FALSE
