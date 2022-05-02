@@ -515,8 +515,10 @@ uninsured %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
-ggplot(childhealthdata) +
+HlthStatusIns <- ggplot(childhealthdata) +
   geom_bar(aes(x = ChildHealthStatus, fill = InsGap_1920))
+
+ggplotly(HlthStatusIns)
 
 uninsuredgrouped <- uninsured %>% 
   group_by(RaceCat) %>% 
