@@ -142,3 +142,63 @@ layout(title = list(text = paste0('Ages of Children',
 
 ```
 
+Overview {data-navmenu=Access}
+=====================================
+
+Column
+-------------------------------------------------------------
+
+### Insurance Coverage
+```{r}
+
+InsStatus <- childhealthdata %>% 
+  group_by(InsGap_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+InsStatus$percentage <- InsStatus$children/sum(InsStatus$children)*100
+InsStatus$Round_off <- round(InsStatus$percentage) 
+
+InsPieChart <- InsStatus %>%
+  filter(!(InsGap_1920 %in% "Unknown")) %>%
+  ggplot() +
+  aes(x = "", y = children, fill = InsGap_1920) +
+  geom_col(color = "black") +
+  geom_label(aes(label = paste0(Round_off, "%")),
+               color = "black",
+             position = position_stack(vjust = 0.5),
+             show.legend = FALSE) +
+  coord_polar(theta = "y") + 
+  guides(fill = guide_legend(title = "Insurance Coverage Status")) +
+ scale_fill_brewer() +
+  theme_void() 
+
+InsPieChart
+
+```
+
+
+Column
+-------------------------------------------------------------
+
+### Needed Care by Insurance
+
+```{r care insurance}
+#insured status by received care
+CareInsChart <- childhealthdata %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(ForegoneCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = ForegoneCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
+ fill = "Insured Status") +
+ theme_minimal()
+
+ggplotly(CareInsChart)
+```
+
+By Race {data-navmenu=Access}
+=====================================

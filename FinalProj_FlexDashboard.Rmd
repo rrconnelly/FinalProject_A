@@ -141,7 +141,7 @@ layout(title = list(text = paste0('Ages of Children',
 
 ```
 
-Overview {data-navmenu="Insurance & Access"}
+Overview {data-navmenu=Access}
 =====================================
 Column
 -------------------------------------------------------------
@@ -197,7 +197,7 @@ CareInsChart <- childhealthdata %>%
 ggplotly(CareInsChart)
 ```
 
-By Race {data-navmenu="Insurance & Access"}
+By Race {data-navmenu=Access}
 =====================================
 Column
 -------------------------------------------------------------
@@ -206,7 +206,7 @@ Column
 #tbd insurance by race 
 ```
 
-By Poverty Level {data-navmenu="Insurance & Access "}
+By Poverty Level {data-navmenu=Access}
 =====================================
 
 Column
