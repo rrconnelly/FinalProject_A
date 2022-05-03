@@ -61,7 +61,7 @@ OtherRace <- childhealthdata %>%
 Demographics
 ===================================== 
 
-###Race of Child
+### Race of Child
 
 ```{r race}
 #race 
