@@ -1,11 +1,12 @@
 ---
-title: "Final Project: Child Welfare in the US"
+title: 'Final Project: Child Welfare in the US'
 runtime: shiny
 output:
   flexdashboard::flex_dashboard: null
   orientation: columns
   vertical_layout: fill
 resource_files:
+- FinalDataforSubmission.csv
 - FinalDataforSubmission.csv
 ---
 
@@ -56,6 +57,9 @@ Hispanic <- childhealthdata %>%
 OtherRace <- childhealthdata %>%
   filter(RaceCat == "Other")
 
+uninsured <- childhealthdata %>%
+  filter(InsGap_1920 == "Periods Uninsured")
+
 ```
 
 Demographics
@@ -85,6 +89,8 @@ RaceWaffle <- c("Black" = 6.86, "Asian" = 39.20, "White" = 52.68, "Hispanic" = 5
 
 RaceWafflePlot <- waffle(RaceWaffle, rows = 25,
        legend_pos = "bottom")
+
+RaceWafflePlot
 
 ```
 
@@ -134,8 +140,43 @@ layout(title = list(text = paste0('Ages of Children',
 
 ```
 
-Accessing Care
+Overview {data-navmenu="Insurance & Access"}
 =====================================
+Column
+-------------------------------------------------------------
+
+### Insurance Coverage
+```{r}
+
+InsStatus <- childhealthdata %>% 
+  group_by(InsGap_1920) %>% 
+  count() %>% arrange(desc(n)) %>%
+  rename("children" = n)
+
+InsStatus$percentage <- InsStatus$children/sum(InsStatus$children)*100
+InsStatus$Round_off <- round(InsStatus$percentage) 
+
+InsStatus %>% percent()
+df$growth <- percent(InsStatus$children, accuracy=1)
+
+InsPieChart <- InsStatus %>%
+  filter(!(InsGap_1920 %in% "Unknown")) %>%
+  ggplot() +
+  aes(x = "", y = children, fill = InsGap_1920) +
+  geom_col(color = "black") +
+  geom_label(aes(label = paste0(Round_off, "%")),
+               color = "black",
+             position = position_stack(vjust = 0.5),
+             show.legend = FALSE) +
+  coord_polar(theta = "y") + 
+  guides(fill = guide_legend(title = "Insurance Coverage Status")) +
+ scale_fill_brewer() +
+  theme_void() 
+
+InsPieChart
+
+```
+
 Column
 -------------------------------------------------------------
 
@@ -158,9 +199,24 @@ CareInsChart <- childhealthdata %>%
 ggplotly(CareInsChart)
 ```
 
+By Race {data-navmenu="Insurance & Access"}
+=====================================
+Column
+-------------------------------------------------------------
+### Insurance Coverage by Race
+```{r}
+#tbd insurance by race 
+```
+
+By Poverty Level {data-navmenu="Insurance & Access "}
+=====================================
+
+Column
+-------------------------------------------------------------
+
 ### Needed Care by Poverty Level 
 
-```{r}
+```{r care poverty}
 CarePovChart <- childhealthdata %>%
  filter(!(ForegoneCare %in% "Unknown")) %>%
  ggplot() +
@@ -175,86 +231,29 @@ CarePovChart <- childhealthdata %>%
 ggplotly(CarePovChart)
 ```
 
-Insurance Status
-=====================================
-Column
--------------------------------------------------------------
-
-### Insurance Coverage
-```{r}
-
-InsStatus <- childhealthdata %>% 
-  group_by(InsGap_1920) %>% 
-  count() %>% arrange(desc(n)) %>%
-  rename("children" = n)
-
-InsStatus$percentage <- InsStatus$children/sum(InsStatus$children)*100
-InsStatus$Round_off <- round(InsStatus$percentage) # Round off the column to integer
-
-InsStatus %>% percent()
-df$growth <- percent(InsStatus$children, accuracy=1)
-
-InsPieChart <- InsStatus %>%
-  filter(!(InsGap_1920 %in% "Unknown")) %>%
-  ggplot() +
-  aes(x = "", y = children, fill = InsGap_1920) +
-  geom_col(color = "black") +
-    geom_label(aes(label = paste0(Round_off, "%")),
-               color = "black",
-             position = position_stack(vjust = 0.5),
-             show.legend = FALSE) +
-  coord_polar(theta = "y") + 
-  guides(fill = guide_legend(title = "Insurance Coverage Status")) +
-  scale_fill_brewer() +
-  theme_void() 
-
-InsPieChart
-
-
-```
-
-
-By Race {data-navmenu="Insurance Status"}
-=====================================
-
-Column 
--------------------------------------------------------------
-
-### Insurance Status
-
-```{r insurance status}
-##value box with number (or percentage) of uninsured children
-```
-
-By Poverty Level {data-navmenu="Insurance Status"}
-=====================================
-
-Column
--------------------------------------------------------------
-
-### Poverty and Insurance
-
-```{r pov and ins}
-#to be determined
-
-
-```
-
-Experiences and Wellbeing
+Outcomes and Wellbeing
 =====================================
 
 Column {data-width=650}
 -------------------------------------------------------------
 
-### ACEs - Black Population
-```{r ACEs Black}
-ACEsBlackPlot <- ggplot(Black) +
- aes(x = AceCount) +
- geom_bar(fill = "#B22222") +
- labs(x = "Number of Adverse Childhood Experiences: Black Children", 
- y = "Number of Children", title = "Adverse Childhood Experiences by Race: Black Children", caption = "Based on National Survey of Children's Health, 2019-2020")
+### ACEs by Racial Category
+```{r ACEs and Race}
+ACEandRACE <- childhealthdata %>%
+ filter(!(RaceCat %in% "Unknown")) %>%
+ filter(!(AceCount %in% "Unknown")) %>%
+  filter(!(AceCount %in% "Missing"))
+ ggplot() +
+ aes(x = RaceCat, fill = AceCount) +
+ geom_bar(position = "fill") +
+  coord_flip() +
+ scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+ labs(x = "Race", y = "Proportion of Children", title = "Adverse Childhood Experiences (ACE) by Race in the US", 
+ caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+ theme_minimal()
 
-ggplotly(ACEsBlackPlot)
+ggplotly(ACEandRACE)
 ```
 
 Column
@@ -268,8 +267,10 @@ FlrshAcePlot <- childhealthdata %>%
 ggplot() +
  aes(x = FlourishStatus6to17, fill = AceCount) +
  geom_bar(position = "fill") +
- scale_fill_hue(direction = 1) +
- labs(x = "Flourishing Items Met", y = "Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
+  coord_flip() +
+  scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+ labs(x = "Flourishing Items Met", y = "Proportion of Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
  subtitle = "Count of Children in the US Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
  theme_minimal()
