@@ -2,17 +2,18 @@
 title: 'Final Project: Child Welfare in the US'
 runtime: shiny
 output:
-  flexdashboard::flex_dashboard: null
+  flexdashboard::flex_dashboard:
   orientation: columns
   vertical_layout: fill
 resource_files:
 - FinalDataforSubmission.csv
-- FinalDataforSubmission.csv
+
 ---
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
+library(dplyr)
 library(DataExplorer)
 library(ggplot2)
 library(plotly)
@@ -156,9 +157,6 @@ InsStatus <- childhealthdata %>%
 InsStatus$percentage <- InsStatus$children/sum(InsStatus$children)*100
 InsStatus$Round_off <- round(InsStatus$percentage) 
 
-InsStatus %>% percent()
-df$growth <- percent(InsStatus$children, accuracy=1)
-
 InsPieChart <- InsStatus %>%
   filter(!(InsGap_1920 %in% "Unknown")) %>%
   ggplot() +
@@ -240,9 +238,6 @@ Column {data-width=650}
 ### ACEs by Racial Category
 ```{r ACEs and Race}
 ACEandRACE <- childhealthdata %>%
- filter(!(RaceCat %in% "Unknown")) %>%
- filter(!(AceCount %in% "Unknown")) %>%
-  filter(!(AceCount %in% "Missing"))
  ggplot() +
  aes(x = RaceCat, fill = AceCount) +
  geom_bar(position = "fill") +
@@ -261,9 +256,6 @@ Column
 ### ACEs and Flourishing Status
 ```{r ACE and Flourish}
 FlrshAcePlot <- childhealthdata %>% 
-  filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
-  filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
-  filter(!(AceCount %in% "Missing")) %>%
 ggplot() +
  aes(x = FlourishStatus6to17, fill = AceCount) +
  geom_bar(position = "fill") +
