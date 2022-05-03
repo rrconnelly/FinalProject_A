@@ -84,7 +84,6 @@ waffle(RaceWaffle, rows = 25,
 
 childhealthdata <- childhealthdata %>% rename(Age = Child.Age)
 
-
 ageplot <- ggplot(childhealthdata) +
   aes(x = Age) +
   geom_histogram(bins = 35L, fill = "#1C7D1C") +
@@ -115,7 +114,6 @@ layout(title = list(text = paste0('Ages of Children',
 #soure code for title in plotly - https://datascott.com/blog/subtitles-with-ggplotly/
 
 ```
-
 
 Accessing Care
 =====================================

@@ -5,9 +5,9 @@ account: rebeccarconnelly
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6218135
-bundleId: 5862604
+bundleId: 5862651
 url: https://rebeccarconnelly.shinyapps.io/TestPublish1A/
-when: 1651538940.17153
-lastSyncTime: 1651538940.17153
+when: 1651540664.39147
+lastSyncTime: 1651540664.39147
 asMultiple: FALSE
 asStatic: FALSE
