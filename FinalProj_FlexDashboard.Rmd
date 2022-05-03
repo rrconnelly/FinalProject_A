@@ -1,5 +1,5 @@
 ---
-title: "Final Project"
+title: "Final Project: Child Welfare in the US"
 runtime: shiny
 output:
   flexdashboard::flex_dashboard: null
@@ -60,6 +60,16 @@ OtherRace <- childhealthdata %>%
 
 Demographics
 ===================================== 
+About this Project {.sidebar}
+--------------------------------------------------------------
+This project was created for submission as a part of Rutgers Data Visualization course. It focuses on child wellbeing in the United States, as evidenced by the National Survey of Children's Health, 2019-2020. 
+
+This dashboard displays demographics of children surveyed, as trends related to insurance status, receiving care, povery, and Adverse Childhood Experiences (ACE).  
+
+Created by [Rebecca Connelly]
+
+Column
+-------------------------------------------------------------
 
 ### Race of Child
 
@@ -73,10 +83,19 @@ RaceCount <- childhealthdata %>%
 
 RaceWaffle <- c("Black" = 6.86, "Asian" = 39.20, "White" = 52.68, "Hispanic" = 559, "Other" = 5.04)
 
-waffle(RaceWaffle, rows = 25,
+RaceWafflePlot <- waffle(RaceWaffle, rows = 25,
        legend_pos = "bottom")
 
 ```
+
+
+### Racial Breakdown
+```{r}
+RaceCount %>% knitr::kable()
+```
+
+Column
+-------------------------------------------------------------
 
 ### Age of Child 
 
@@ -117,21 +136,8 @@ layout(title = list(text = paste0('Ages of Children',
 
 Accessing Care
 =====================================
-
-Insurance Status 
------------------------------------------------------------------------
-
-### Insurance Status
-
-```{r insurance status}
-HlthStatusIns <- ggplot(childhealthdata) +
-  geom_bar(aes(x = ChildHealthStatus, fill = InsGap_1920))
-
-ggplotly(HlthStatusIns)
-```
-
-Needed Care
------------------------------------------------------------------------
+Column
+-------------------------------------------------------------
 
 ### Needed Care
 
@@ -152,11 +158,41 @@ CareInsChart <- childhealthdata %>%
 ggplotly(CareInsChart)
 ```
 
+
+By Race {data-navmenu="Insurance Status"}
+=====================================
+
+Column 
+-------------------------------------------------------------
+
+### Insurance Status
+
+```{r insurance status}
+HlthStatusIns <- ggplot(childhealthdata) +
+  geom_bar(aes(x = ChildHealthStatus, fill = InsGap_1920))
+
+ggplotly(HlthStatusIns)
+```
+
+By Poverty Level {data-navmenu="Insurance Status"}
+=====================================
+
+Column
+-------------------------------------------------------------
+
+### Poverty and Insurance
+
+```{r pov and ins}
+#to be determined
+
+
+```
+
 Experiences and Wellbeing
 =====================================
 
-ACEs by Race {data-width=650}
------------------------------------------------------------------------
+Column {data-width=650}
+-------------------------------------------------------------
 
 ### ACEs - Black Population
 ```{r ACEs Black}
@@ -169,6 +205,8 @@ ACEsBlackPlot <- ggplot(Black) +
 ggplotly(ACEsBlackPlot)
 ```
 
+Column
+-------------------------------------------------------------
 ### ACEs and Flourishing Status
 ```{r ACE and Flourish}
 FlrshAcePlot <- childhealthdata %>% 
