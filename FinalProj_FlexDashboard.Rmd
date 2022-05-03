@@ -100,13 +100,19 @@ children with disabilities and children ages 0-5",
     theme_minimal()
 
 ggplotly(ageplot) %>%
-    layout(title = list(text = paste0('Ages of Children T',
+layout(title = list(text = paste0('Ages of Children',
                                     '<br>',
                                     '<sup>',
-                                    'Age Distribution of Child of Interest, with an over sampling of 
-children with disabilities and children ages 0-5',
-                                    '</sup>')))
+                                    'Age distribution of children sampled, with an over sampling of children with disabilities and children ages 0-5',
+                                    '</sup>')),
+  annotations = 
+ list(x = 1, y = -0.1, text = "Data Source: National Survey of Children's Health, 2019-2020", 
+      showarrow = F, xref='paper', yref='paper', 
+      xanchor='right', yanchor='auto', xshift=0, yshift=0,
+      font=list(size=10, color="black")))
 
+#^source for caption in plotly code = https://stackoverflow.com/questions/45103559/plotly-adding-a-source-or-caption-to-a-chart
+#soure code for title in plotly - https://datascott.com/blog/subtitles-with-ggplotly/
 
 ```
 
