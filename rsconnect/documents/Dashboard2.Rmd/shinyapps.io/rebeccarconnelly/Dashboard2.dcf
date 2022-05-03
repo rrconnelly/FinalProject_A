@@ -1,0 +1,13 @@
+name: Dashboard2
+title: Dashboard2
+username:
+account: rebeccarconnelly
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6224667
+bundleId: 5865817
+url: https://rebeccarconnelly.shinyapps.io/Dashboard2/
+when: 1651603165.68921
+lastSyncTime: 1651603165.68921
+asMultiple: FALSE
+asStatic: FALSE
