@@ -112,31 +112,13 @@ RaceCount <- childhealthdata %>%
   rename("children" = n)
 
 
-RaceWaffle2 <- c("Black" = 1.37, "Asian" = 7.84, "White" = 11, "Hispanic" = 112, "Other" = 1)
+RaceWaffle2 <- c("Black: 686" = 1.37, "Asian: 3,920" = 7.84, "White: 5,268" = 11, "Hispanic: 55,895" = 112, "Other 504" = 1)
 
 
-RaceWafflePlot2 <- waffle(RaceWaffle2, rows = 11,
-       legend_pos = "bottom")
+RaceWafflePlot2 <- waffle(RaceWaffle2, rows = 11,)
 
 RaceWafflePlot2
 
-#fancier waffle 
-
-df <- data.frame(group = LETTERS[1:3],
-                 value = c(25, 20, 35))
-
-# Waffle plot
-ggplot(RaceCount, aes(fill = RaceCat, values = children)) +
-  geom_waffle(n_rows = 10, size = 0.33, colour = "white") +
-  coord_equal() +
-  theme_void()
-
-```
-
-
-### Racial Breakdown
-```{r}
-RaceCount %>% knitr::kable()
 ```
 
 
@@ -155,9 +137,12 @@ InsPieChart <- InsStatus %>%
   filter(!(InsGap_1920 %in% "Unknown")) %>%
   ggplot() +
   aes(x = "", y = children, fill = InsGap_1920) +
+  theme(legend.title = element_text(size=40), 
+        legend.text = element_text(size=40)) +
   geom_col(color = "black") +
   geom_label(aes(label = paste0(Round_off, "%")),
                color = "black",
+             size = 8,
              position = position_stack(vjust = 0.5),
              show.legend = FALSE) +
   coord_polar(theta = "y") + 
@@ -257,6 +242,11 @@ valueBox("6.15%", caption = "Percent Uninsured", icon = NULL, color = NULL, href
 valueBox("28.71%", caption = "Percent in Poverty", icon = NULL, color = NULL, href = NULL)
 ```
 
+### Needed Treatment Stats
+
+```{r value box treatment }
+valueBox("3.1%", caption = "Percent Who Need Treatment & Did not Receive It", icon = NULL, color = NULL, href = NULL)
+```
 
 Row
 -------------------------------------------------------------
@@ -285,7 +275,17 @@ Row
 
 
 ```{r reasons care not received }
+numineligible <- childhealthdata %>% filter(ineligible_1920 == 1) %>% count()
 
+numunavailable <- childhealthdata %>% filter(unavailable_1920 == 1) %>% count()
+
+numnoappt <- childhealthdata %>% count(appointment_1920)
+
+reasonsnocare <- c("ineligible_1920", "unavailable_1920", "appointment_1920", "transport_1920", "NotOpen_1920", "CostIssue_1920", "MedBills_1920")
+
+reasonsnocaredata <- childhealthdata[reasonsnocare]
+
+reasonsnocareFiltered <- reasonsnocaredata %>% filter(ineligible_1920 == 1, unavailable_1920 == 1, appointment_1920 == 1, transport_1920 == 1, NotOpen_1920 == 1, CostIssue_1920 == 1,MedBills_1920 == 1)
 ```
 
 By Race {data-navmenu=Access}
