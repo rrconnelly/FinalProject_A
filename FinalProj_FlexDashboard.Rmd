@@ -2,8 +2,7 @@
 title: 'Final Project: Child Welfare in the US'
 output:
   flexdashboard::flex_dashboard:
-    theme: cosmo
-    orientation: rows
+    theme: lumen
     vertical_layout: fill
 runtime: shiny
 resource_files:
@@ -88,7 +87,7 @@ childhealthdata <- childhealthdata %>% mutate(povlevel = recode_factor(povlev4_1
 
 ```
 
-Demographics {orientation=columns}
+Demographics 
 ===================================== 
 About this Project {.sidebar}
 --------------------------------------------------------------
@@ -129,29 +128,32 @@ InsStatus <- childhealthdata %>%
   group_by(InsGap_1920) %>% 
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
+InsStatus <- InsStatus %>% filter(InsGap_1920 != "Unknown")
 
 InsStatus$percentage <- InsStatus$children/sum(InsStatus$children)*100
 InsStatus$Round_off <- round(InsStatus$percentage) 
 
-InsPieChart <- InsStatus %>%
-  filter(!(InsGap_1920 %in% "Unknown")) %>%
-  ggplot() +
-  aes(x = "", y = children, fill = InsGap_1920) +
-  theme(legend.title = element_text(size=40), 
-        legend.text = element_text(size=40)) +
-  geom_col(color = "black") +
-  geom_label(aes(label = paste0(Round_off, "%")),
-               color = "black",
-             size = 8,
-             position = position_stack(vjust = 0.5),
-             show.legend = FALSE) +
-  coord_polar(theta = "y") + 
-  guides(fill = guide_legend(title = "Insurance Coverage Status")) +
- scale_fill_brewer() +
-  theme_void() 
+#in plotly
 
-InsPieChart
+piecolors <- c('rgb(144,103,167)', 'rgb(211,94,96)')
 
+InsurancePieChart <- plot_ly(InsStatus, labels = ~InsGap_1920, values = ~children, type = 'pie', 
+        textposition = 'outside',
+        textinfo = 'percent',
+        insidetextfont = list(color = '#FFFFFF'),
+        hoverinfo = 'text',
+        text = ~paste(children),
+        marker = list(colors = piecolors),
+                      line = list(color = '#FFFFFF', width = 1),
+        showlegend = TRUE)
+
+InsurancePieChart <- InsurancePieChart %>% layout(title = 'Insurance Coverage',
+      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+InsurancePieChart
+
+#pie chart source: https://plotly.com/r/pie-charts/
 ```
 
 Column
@@ -171,7 +173,8 @@ ageplot <- ggplot(childhealthdata) +
     y = "Number of Children",
     title = "Ages of Children",
     subtitle = "Age Distribution of Child of Interest, with an over sampling of 
-children with disabilities and children ages 0-5",
+
+    children with disabilities and children ages 0-5",
     caption = "Data Source: National Survey of Children's Health, 2019-2020"
   ) +
   coord_flip() +
@@ -213,19 +216,14 @@ layout(title = list(text = paste0('Poverty Levels',
                                     '<br>',
                                     '<sup>',
                                     'Povery of children sampled',
-                                    '</sup>')),
-  annotations = 
- list(x = 1, y = -0.1, text = "Data Source: National Survey of Children's Health, 2019-2020", 
-      showarrow = F, xref='paper', yref='paper', 
-      xanchor='right', yanchor='auto', xshift=0, yshift=0,
-      font=list(size=10, color="black")))
+                                    '</sup>')))
 ```
 
 
-Overview {data-navmenu=Access}
+Access {orientation=rows}
 =====================================
 
-Row
+Column
 -----------------------------------------------------------------------
 
 ### Uninsured Stats
@@ -248,31 +246,11 @@ valueBox("28.71%", caption = "Percent in Poverty", icon = NULL, color = NULL, hr
 valueBox("3.1%", caption = "Percent Who Need Treatment & Did not Receive It", icon = NULL, color = NULL, href = NULL)
 ```
 
-Row
+
+Column
 -------------------------------------------------------------
 
-### Needed Care by Insurance
-
-```{r care insurance}
-#insured status by received care
-CareInsChart <- childhealthdata %>%
- filter(!(InsGap_1920 %in% "Unknown")) %>%
- filter(!(ForegoneCare %in% "Unknown")) %>%
- ggplot() +
- aes(x = ForegoneCare, fill = InsGap_1920) +
- geom_bar(position = "fill") +
- scale_fill_viridis_d(option = "viridis", direction = 1) +
- labs(x = "Whether Child Missed out on Needed Care", 
- y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
- fill = "Insured Status") +
- theme_minimal()
-
-ggplotly(CareInsChart)
-```
-
-Row
--------------------------------------------------------------
-
+### Care Not Received
 
 ```{r reasons care not received }
 numineligible <- childhealthdata %>% filter(ineligible_1920 == 1) %>% count()
@@ -305,24 +283,31 @@ reasonsnocareplot <- ggplot(reasonsnocaredata) +
 reasonsnocareplot
 ```
 
-By Race {data-navmenu=Access}
-=====================================
-Row
+Column {.tabset}
 -------------------------------------------------------------
-### Insurance Coverage by Race
-```{r}
-#tbd insurance by race 
+
+### Needed Care by Insurance 
+
+```{r care insurance}
+#insured status by received care
+CareInsChart <- childhealthdata %>%
+ filter(!(InsGap_1920 %in% "Unknown")) %>%
+ filter(!(ForegoneCare %in% "Unknown")) %>%
+ ggplot() +
+ aes(x = ForegoneCare, fill = InsGap_1920) +
+ geom_bar(position = "fill") +
+ scale_fill_viridis_d(option = "viridis", direction = 1) +
+ labs(x = "Whether Child Missed out on Needed Care", 
+ y = "Proportion of Children", title = "Children Receiving Necessary Care by Insurance Status", caption = "Based on National Survey of Children's Health, 2019-2020", 
+ fill = "Insured Status") +
+ theme_minimal()
+
+ggplotly(CareInsChart)
 ```
 
-By Poverty Level {data-navmenu=Access}
-=====================================
+### Needed Care By Poverty Level 
 
-Row
--------------------------------------------------------------
-
-### Needed Care by Poverty Level 
-
-```{r care poverty}
+```{r care by poverty}
 CarePovChart <- childhealthdata %>%
  filter(!(ForegoneCare %in% "Unknown")) %>%
  ggplot() +
@@ -337,10 +322,33 @@ CarePovChart <- childhealthdata %>%
 ggplotly(CarePovChart)
 ```
 
-Outcomes and Wellbeing
+
+### Needed Care by Race 
+
+```{r}
+#TBD
+```
+
+Column {.tabset}
+-------------------------------------------------------------
+### Insurance Coverage by Race
+
+```{r}
+#TBD
+```
+
+
+### Insurance Coverage by Poverty Level 
+
+```{r}
+#TBD
+```
+
+
+Outcomes and Wellbeing {orientation=rows}
 =====================================
 
-Row
+Column
 -------------------------------------------------------------
 
 ### ACEs by Racial Category
@@ -361,7 +369,7 @@ ACEandRACE <- childhealthdata %>%
 ggplotly(ACEandRACE)
 ```
 
-Row
+Column
 -------------------------------------------------------------
 ### ACEs and Flourishing Status
 ```{r ACE and Flourish}
