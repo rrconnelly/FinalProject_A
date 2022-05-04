@@ -279,13 +279,30 @@ numineligible <- childhealthdata %>% filter(ineligible_1920 == 1) %>% count()
 
 numunavailable <- childhealthdata %>% filter(unavailable_1920 == 1) %>% count()
 
-numnoappt <- childhealthdata %>% count(appointment_1920)
+numnoappt <- childhealthdata %>% filter(appointment_1920 == 1) %>% count()
 
-reasonsnocare <- c("ineligible_1920", "unavailable_1920", "appointment_1920", "transport_1920", "NotOpen_1920", "CostIssue_1920", "MedBills_1920")
+numntransport <- childhealthdata %>% filter(transport_1920 == 1) %>% count()
 
-reasonsnocaredata <- childhealthdata[reasonsnocare]
+numNotOpen <- childhealthdata %>% filter(NotOpen_1920 == 1) %>% count()
 
-reasonsnocareFiltered <- reasonsnocaredata %>% filter(ineligible_1920 == 1, unavailable_1920 == 1, appointment_1920 == 1, transport_1920 == 1, NotOpen_1920 == 1, CostIssue_1920 == 1,MedBills_1920 == 1)
+numCostIssue <- childhealthdata %>% filter(CostIssue_1920 == 1) %>% count()
+
+reasons <- c("Not Eligible", "Unavailable in Area", "Couldn't Get Appointment", "Transportation or Childcare Issues", "Office Wasn't Open", "Cost")
+reasonscount <- c(518, 602, 1129, 230, 596, 1118)
+
+reasonsnocaredata <- data.frame(reasons, reasonscount)
+
+reasonsnocareplot <- ggplot(reasonsnocaredata) +
+  aes(x = reasons, y = reasonscount) +
+  geom_bar(stat = "identity", fill = "#1C7D1C") +
+  labs(
+    x = "Reason Healthcare Not Received",
+    y = "Number of Children",
+    title = "Reasons for Missing Needed Care") +
+  coord_flip() +
+    theme_minimal()
+
+reasonsnocareplot
 ```
 
 By Race {data-navmenu=Access}
