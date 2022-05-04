@@ -3,7 +3,7 @@ title: 'Final Project: Child Welfare in the US'
 runtime: shiny
 output:
   flexdashboard::flex_dashboard:
-  orientation: columns
+  orientation: rows
   vertical_layout: fill
 resource_files:
 - FinalDataforSubmission.csv
@@ -89,7 +89,7 @@ This dashboard displays demographics of children surveyed, as trends related to 
 
 Created by [Rebecca Connelly]
 
-Column
+Row
 -------------------------------------------------------------
 
 ### Race of Child
@@ -117,7 +117,7 @@ RaceWafflePlot
 RaceCount %>% knitr::kable()
 ```
 
-Column
+Row
 -------------------------------------------------------------
 
 ### Age of Child 
@@ -160,9 +160,22 @@ layout(title = list(text = paste0('Ages of Children',
 Overview {data-navmenu=Access}
 =====================================
 
+Row
+-----------------------------------------------------------------------
 
+### Basic Stats
 
-Column
+```{r value boxes}
+#renderValueBox({
+  #percentuninsured <- prettyNum(6.15), big.mark=",")
+  #valueBox(percentuninsured)
+#})
+
+valueBox(6.15, caption = "Percent Uninsured", icon = NULL, color = NULL, href = NULL)
+
+```
+
+Row
 -------------------------------------------------------------
 
 ### Insurance Coverage
@@ -194,7 +207,7 @@ InsPieChart
 
 ```
 
-Column
+Row
 -------------------------------------------------------------
 
 ### Needed Care by Insurance
@@ -218,7 +231,7 @@ ggplotly(CareInsChart)
 
 By Race {data-navmenu=Access}
 =====================================
-Column
+Row
 -------------------------------------------------------------
 ### Insurance Coverage by Race
 ```{r}
@@ -228,7 +241,7 @@ Column
 By Poverty Level {data-navmenu=Access}
 =====================================
 
-Column
+Row
 -------------------------------------------------------------
 
 ### Needed Care by Poverty Level 
@@ -251,7 +264,7 @@ ggplotly(CarePovChart)
 Outcomes and Wellbeing
 =====================================
 
-Column {data-width=650}
+Row
 -------------------------------------------------------------
 
 ### ACEs by Racial Category
@@ -272,7 +285,7 @@ ACEandRACE <- childhealthdata %>%
 ggplotly(ACEandRACE)
 ```
 
-Column
+Row
 -------------------------------------------------------------
 ### ACEs and Flourishing Status
 ```{r ACE and Flourish}
