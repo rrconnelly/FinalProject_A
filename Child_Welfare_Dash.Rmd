@@ -250,7 +250,7 @@ valueBox("3%", caption = "Percent Who Need Treatment & Did Not Receive It", icon
 ```
 
 
-Row 2
+Row 2 {data-width:650}
 -------------------------------------------------------------
 
 ### Care Not Received
@@ -314,7 +314,7 @@ ggplotly(insurancepovchart, tooltip = "text")
 ```
 
 
-Row {.tabset}
+Row {data-width:450 .tabset}
 -------------------------------------------------------------
 
 ### Needed Care By Insurance Status
