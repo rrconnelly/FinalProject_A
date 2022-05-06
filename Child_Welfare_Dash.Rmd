@@ -94,7 +94,7 @@ childhealthdata <- childhealthdata %>% mutate(Age = recode_factor(Child.Age,
   .default = "Unknown"))
 ```
 
-Demographics 
+Demographics {data-orientation=columns}
 ===================================== 
 About this Project {.sidebar}
 --------------------------------------------------------------
@@ -104,7 +104,7 @@ This dashboard displays demographics of children surveyed, as trends related to 
 
 Created by [Rebecca Connelly]
 
-Column {data-width=650} 
+Column {data-width=450} 
 -------------------------------------------------------------
 
 ### Racial Distribution
@@ -132,33 +132,6 @@ RaceTreeMap
 
 
 ```
-
-
-### Age Distribution
-
-```{r child age}
-
-ageplot <- ggplot(childhealthdata) +
-  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
-  geom_bar(fill = "#21918c") +
-  labs(
-    x = "Age of Child",
-    y = "Number of Children",
-    title = "Age Distribution of Children",
-  ) +
-  coord_flip() +
-    theme_minimal()
-
-
-ggplotly(ageplot, tooltip = "text")
-  
-
-```
-
-
-Column {data-width=450}
--------------------------------------------------------------
-
 
 ### Insurance Coverage
 ```{r insurance pie chart}
@@ -193,6 +166,30 @@ InsurancePieChart <- InsurancePieChart %>% layout(title = 'Insurance Coverage',
 InsurancePieChart
 
 ```
+
+
+Column {data-width=650}
+-------------------------------------------------------------
+
+### Age Distribution
+
+```{r child age}
+
+ageplot <- ggplot(childhealthdata) +
+  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
+  geom_bar(fill = "#21918c") +
+  labs(
+    x = "Age of Child",
+    y = "Number of Children",
+    title = "Age Distribution of Children",
+  ) +
+    theme_minimal()
+
+
+ggplotly(ageplot, tooltip = "text")
+  
+```
+
 
 
 ### Poverty Levels 
@@ -406,6 +403,9 @@ ggplotly(ACEandRACE, tooltip = c("text", "ACEs")) %>% layout(title = "Adverse Ch
   #filter(!(ACEs %in% "Missing"))
 
 FlrshAcePlot <- childhealthdata %>% 
+  filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
+ filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
+  filter(!(ACEs %in% "Missing")) %>%
 ggplot() +
  aes(x = FlourishStatus6to17, fill = ACEs, text = paste("Children:", ..count..)) +
  geom_bar(stat="count", position = "fill") +
