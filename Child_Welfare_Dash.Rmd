@@ -74,6 +74,28 @@ childhealthdata <- childhealthdata %>% filter(!(FlourishStatus6to17 %in% "Unknow
   filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
   filter(!(ACEs %in% "Missing")) %>%
   filter(!(ACEs %in% "Unknown"))
+
+childhealthdata <- childhealthdata %>% mutate(Age = recode_factor(Child.Age,
+  "0" = "0",
+  "1" = "1",
+  "2" = "2",
+  "3" = "3",
+  "4" = "4",
+  "5" = "5",
+  "6" = "6", 
+  "7" = "7",
+  "8" = "8",
+  "9" = "9",
+  "10" = "10",
+  "11" = "11",
+  "12" = "12",
+  "13" = "13",
+  "14" = "14",
+  "15" = "15",
+  "16" = "16",
+  "17" = "17",
+  .ordered = TRUE,
+  .default = "Unknown"))
 ```
 
 Demographics {data-orientation=columns}
@@ -157,11 +179,9 @@ Column {data-width=650}
 
 ```{r child age}
 
-childhealthdata <- childhealthdata %>% rename(Age = Child.Age)
-
 ageplot <- ggplot(childhealthdata) +
-  aes(x = round(Age, digits = 0), text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
-  geom_histogram(bins = 17, fill = "#21918c") +
+  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
+  geom_bar(fill = "#21918c") +
   labs(
     x = "Age of Child",
     y = "Number of Children",
@@ -169,6 +189,8 @@ ageplot <- ggplot(childhealthdata) +
   ) +
   coord_flip() +
     theme_minimal()
+
+# text = paste0("Age: ", x, "<br> Children: ", ..count..)
 
 ggplotly(ageplot, tooltip = "text")
   
