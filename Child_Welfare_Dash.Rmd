@@ -314,7 +314,7 @@ ggplotly(insurancepovchart, tooltip = "text")
 ```
 
 
-Row {data-width:450 .tabset}
+Row {.tabset data-width:450}
 -------------------------------------------------------------
 
 ### Needed Care By Insurance Status
