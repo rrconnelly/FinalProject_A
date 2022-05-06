@@ -51,7 +51,7 @@ childhealthdata <- childhealthdata %>% mutate(ACEs = recode_factor(ACEct_1920,
   "10" = "10",
   "99" = "Missing",
   .ordered = TRUE,
-  .default = "Unknown"))
+  .default = "Missing"))
 
 childhealthdata <- childhealthdata %>% mutate(povlevel = recode_factor(povlev4_1920, 
   "1" = "Below 100% FPL",
@@ -70,11 +70,6 @@ childhealthdata <- childhealthdata %>% mutate(RaceCat = recode_factor(Race,
   "99" = "Unknown",
   .ordered = TRUE,
   .default = "Unknown"))
-
-childhealthdata <- childhealthdata %>% filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
-  filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
-  filter(!(ACEs %in% "Missing")) %>%
-  filter(!(ACEs %in% "Unknown"))
 
 childhealthdata <- childhealthdata %>% mutate(Age = recode_factor(Child.Age,
   "0" = "0",
@@ -99,7 +94,7 @@ childhealthdata <- childhealthdata %>% mutate(Age = recode_factor(Child.Age,
   .default = "Unknown"))
 ```
 
-Demographics {data-orientation=columns}
+Demographics 
 ===================================== 
 About this Project {.sidebar}
 --------------------------------------------------------------
@@ -109,7 +104,7 @@ This dashboard displays demographics of children surveyed, as trends related to 
 
 Created by [Rebecca Connelly]
 
-Column {data-width=450} 
+Column {data-width=650} 
 -------------------------------------------------------------
 
 ### Racial Distribution
@@ -137,6 +132,32 @@ RaceTreeMap
 
 
 ```
+
+
+### Age Distribution
+
+```{r child age}
+
+ageplot <- ggplot(childhealthdata) +
+  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
+  geom_bar(fill = "#21918c") +
+  labs(
+    x = "Age of Child",
+    y = "Number of Children",
+    title = "Age Distribution of Children",
+  ) +
+  coord_flip() +
+    theme_minimal()
+
+
+ggplotly(ageplot, tooltip = "text")
+  
+
+```
+
+
+Column {data-width=450}
+-------------------------------------------------------------
 
 
 ### Insurance Coverage
@@ -173,30 +194,6 @@ InsurancePieChart
 
 ```
 
-Column {data-width=650}
--------------------------------------------------------------
-
-### Age Distribution
-
-```{r child age}
-
-ageplot <- ggplot(childhealthdata) +
-  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
-  geom_bar(fill = "#21918c") +
-  labs(
-    x = "Age of Child",
-    y = "Number of Children",
-    title = "Age Distribution of Children",
-  ) +
-  coord_flip() +
-    theme_minimal()
-
-# text = paste0("Age: ", x, "<br> Children: ", ..count..)
-
-ggplotly(ageplot, tooltip = "text")
-  
-
-```
 
 ### Poverty Levels 
 
@@ -404,6 +401,9 @@ ggplotly(ACEandRACE, tooltip = c("text", "ACEs")) %>% layout(title = "Adverse Ch
 ### ACEs and Flourishing Status
 ```{r ACE and Flourish}
 
+#childhealthdata <- childhealthdata %>% filter(!(FlourishStatus6to17 %in% "Unknown")) %>%
+ # filter(!(FlourishStatus6to17 %in% "NA, Under 5")) %>%
+  #filter(!(ACEs %in% "Missing"))
 
 FlrshAcePlot <- childhealthdata %>% 
 ggplot() +
