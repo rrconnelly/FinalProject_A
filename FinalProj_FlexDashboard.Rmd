@@ -27,7 +27,6 @@ library(treemapify)
 # read in data 
 childhealthdata <- read_csv("FinalDataforSubmission.csv")
 
-#("C:/Users/rebec/Documents/GitHub/FinalProject_A/2019-2020 National Survey of Children's Health (NSCH)/FinalDataforSubmission.csv")
 
 #adding filtered variables 
 
@@ -108,7 +107,6 @@ RaceTreeMap <- ggplot(RaceCount, aes(area = children, fill = RaceCat, label = Ra
 
 RaceTreeMap
 
-#^ source: https://plotly.com/ggplot2/treemaps/
 
 
 ```
@@ -146,7 +144,6 @@ InsurancePieChart <- InsurancePieChart %>% layout(title = 'Insurance Coverage',
 
 InsurancePieChart
 
-#pie chart source: https://plotly.com/r/pie-charts/
 ```
 
 Column {data-width=650}
@@ -171,7 +168,6 @@ ageplot <- ggplot(childhealthdata) +
 
 ggplotly(ageplot, tooltip = "text")
   
-#soure code for title in plotly - https://datascott.com/blog/subtitles-with-ggplotly/
 
 ```
 
@@ -190,7 +186,7 @@ povplot <- ggplot(childhealthdata) +
 
 ggplotly(povplot, tooltip = "text")
 
-#"<br> Poverty Level", fill
+
 ```
 
 
