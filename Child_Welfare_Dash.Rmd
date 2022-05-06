@@ -390,7 +390,7 @@ Experiences and Wellbeing {data-orientation=columns}
 Column {data-width=450} 
 --------------------------------------------------------------
 ### Overview 
-Adverse Childhood Experiences, known as "ACEs", are potentially traumatic events that occur in childhood (ages 0-17). The events, included here, are not necessarily traumatic but have the potential to be, especially exposure to multiple. Here we look at ACEs in relation to overall ability to flourish status (as assessed by responses to a set of 3 items, 3 being ideal). 
+Adverse Childhood Experiences, known as "ACEs", are potentially traumatic events that occur in childhood (ages 0-17). The events, included here, are not necessarily traumatic but have the potential to be, especially exposure to multiple. Here we look at ACEs in relation to overall ability to flourish (as assessed by responses to a set of 3 items, 3 being ideal). 
 We see ACES correlated with worse health status, with worse  “flourishing” status and that the sum of ACEs across racial categories is disparate. That is, **ACEs correlate with worse outcomes and we see some Races disproportionately impacted.**
 
 Column  {data-width=850} 
