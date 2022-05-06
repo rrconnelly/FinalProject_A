@@ -21,6 +21,8 @@ library(shiny)
 library(waffle)
 library(rsconnect)
 library(scales)
+library(packcircles)
+library(treemapify)
 
 # read in data 
 childhealthdata <- read_csv("FinalDataforSubmission.csv")
@@ -60,9 +62,18 @@ childhealthdata <- childhealthdata %>% mutate(povlevel = recode_factor(povlev4_1
   .ordered = TRUE,
   .default = "Unknown"))
 
+childhealthdata <- childhealthdata %>% mutate(RaceCat = recode_factor(Race, 
+  "1" = "Hispanic",
+  "2" = "White",
+  "4" = "Asian",
+  "3" = "Black",
+  "5" = "Other",
+  "99" = "Unknown",
+  .ordered = TRUE,
+  .default = "Unknown"))
 ```
 
-Demographics {orientation=columns}
+Demographics {data-orientation=columns}
 ===================================== 
 About this Project {.sidebar}
 --------------------------------------------------------------
@@ -72,7 +83,7 @@ This dashboard displays demographics of children surveyed, as trends related to 
 
 Created by [Rebecca Connelly]
 
-Column {data-height=450} 
+Column {data-width=450} 
 -------------------------------------------------------------
 
 ### Racial Distribution
@@ -85,13 +96,20 @@ RaceCount <- childhealthdata %>%
   count() %>% arrange(desc(n)) %>%
   rename("children" = n)
 
+RaceCount <- RaceCount %>% filter(!(RaceCat %in% "Unknown")) 
 
-RaceWaffle2 <- c("Black: 686" = 1.37, "Asian: 3,920" = 7.84, "White: 5,268" = 11, "Hispanic: 55,895" = 112, "Other 504" = 1)
+# race tree map 
 
+RaceTreeMap <- ggplot(RaceCount, aes(area = children, fill = RaceCat, label = RaceCat)) +
+  geom_treemap() + 
+  scale_fill_viridis_d(option = "viridis", 
+ direction = 1) +
+   geom_treemap_text(fontface = "italic", colour = "white", place = "centre", min.size = 2, grow = TRUE)
 
-RaceWafflePlot2 <- waffle(RaceWaffle2, rows = 11,)
+RaceTreeMap
 
-RaceWafflePlot2
+#^ source: https://plotly.com/ggplot2/treemaps/
+
 
 ```
 
@@ -131,7 +149,7 @@ InsurancePieChart
 #pie chart source: https://plotly.com/r/pie-charts/
 ```
 
-Column
+Column {data-width=650}
 -------------------------------------------------------------
 
 ### Age Distribution
@@ -141,30 +159,18 @@ Column
 childhealthdata <- childhealthdata %>% rename(Age = Child.Age)
 
 ageplot <- ggplot(childhealthdata) +
-  aes(x = Age) +
-  geom_histogram(bins = 35L, fill = "#440154") +
+  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
+  geom_histogram(bins = 35L, fill = "#21918c") +
   labs(
     x = "Age of Child",
     y = "Number of Children",
-    title = "Ages of Children",
-    subtitle = "Age Distribution of Children",
+    title = "Age Distribution of Children",
   ) +
   coord_flip() +
     theme_minimal()
 
-ggplotly(ageplot) %>%
-layout(title = list(text = paste0('Ages of Children',
-                                    '<br>',
-                                    '<sup>',
-                                    'Age distribution of children sampled, with an over sampling of children with disabilities and children ages 0-5',
-                                    '</sup>')),
-  annotations = 
- list(x = 1, y = -0.1, text = "Data Source: National Survey of Children's Health, 2019-2020", 
-      showarrow = F, xref='paper', yref='paper', 
-      xanchor='right', yanchor='auto', xshift=0, yshift=0,
-      font=list(size=10, color="black")))
-
-#^source for caption in plotly code = https://stackoverflow.com/questions/45103559/plotly-adding-a-source-or-caption-to-a-chart
+ggplotly(ageplot, tooltip = "text")
+  
 #soure code for title in plotly - https://datascott.com/blog/subtitles-with-ggplotly/
 
 ```
@@ -173,7 +179,7 @@ layout(title = list(text = paste0('Ages of Children',
 
 ```{r poverty level chart}
 povplot <- ggplot(childhealthdata) +
-  aes(x = povlevel) +
+  aes(x = povlevel, text = paste0("Children: ", ..count.., "<br> Poverty Level: ", x)) +
   geom_bar(fill = "#440154") +
   labs(
     x = "Relation to Federal Poverty Level",
@@ -182,7 +188,9 @@ povplot <- ggplot(childhealthdata) +
     theme_minimal()
 
 
-ggplotly(povplot)
+ggplotly(povplot, tooltip = "text")
+
+#"<br> Poverty Level", fill
 ```
 
 
@@ -231,14 +239,14 @@ numNotOpen <- childhealthdata %>% filter(NotOpen_1920 == 1) %>% count()
 
 numCostIssue <- childhealthdata %>% filter(CostIssue_1920 == 1) %>% count()
 
-reasons <- c("Not Eligible", "Unavailable in Area", "Couldn't Get Appointment", "Transportation or Childcare Issues", "Office Wasn't Open", "Cost")
+Reason <- c("Not Eligible", "Unavailable in Area", "Couldn't Get Appointment", "Transportation or Childcare Issues", "Office Wasn't Open", "Cost")
 reasonscount <- c(518, 602, 1129, 230, 596, 1118)
 
-reasonsnocaredata <- data.frame(reasons, reasonscount)
+reasonsnocaredata <- data.frame(Reason, reasonscount)
 
 reasonsnocareplot <- ggplot(reasonsnocaredata) +
-  aes(x = reasons, y = reasonscount) +
-  geom_bar(stat = "identity", fill = "#440154"  ) +
+  aes(x = Reason, y = reasonscount, text = paste0("Children: ", reasonscount, "<br> Reason: ", Reason)) +
+  geom_bar(stat = "identity", fill = "#440154") +
   labs(
     x = "",
     y = "Number of Children",
@@ -246,7 +254,8 @@ reasonsnocareplot <- ggplot(reasonsnocaredata) +
   coord_flip() +
     theme_minimal()
 
-ggplotly(reasonsnocareplot)
+ggplotly(reasonsnocareplot, tooltip = "text")
+
 ```
 
 ### Insurance & Poverty 
@@ -258,17 +267,17 @@ ggplotly(reasonsnocareplot)
 insurancepovchart <- childhealthdata %>%
  filter(!(InsGap_1920 %in% "Unknown")) %>%
  ggplot() +
- aes(x = InsGap_1920, fill = povlevelgrouped) +
+ aes(x = InsGap_1920, fill = povlevelgrouped, text = paste("Children: ", ..count.., "<br> Poverty Level: ", fill)) +
  geom_bar(position = "fill") +
  scale_fill_viridis_d(option = "viridis", 
  direction = 1) +
   scale_y_continuous(labels = scales::percent) +
- labs(x = "", y = "Percentage", title = "Insurance Status and Poverty Level in US", 
+ labs(x = "", y = "Percentage", title = "Insurance Status and Poverty Level in US",
  caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Poverty Level") +
  coord_flip() +
  theme_minimal()
 
-ggplotly(insurancepovchart)
+ggplotly(insurancepovchart, tooltip = "text")
 ```
 
 
@@ -283,7 +292,7 @@ CareInsChart <- childhealthdata %>%
  filter(!(InsGap_1920 %in% "Unknown")) %>%
  filter(!(ForegoneCare %in% "Unknown")) %>%
  ggplot() +
- aes(x = ForegoneCare, fill = InsGap_1920) +
+ aes(x = ForegoneCare, fill = InsGap_1920, text = paste("Children: ", ..count..), "<br> Insurance Status: ", fill) +
  geom_bar(position = "fill") +
  scale_fill_viridis_d(option = "viridis", direction = 1) +
   scale_y_continuous(labels = scales::percent) +
@@ -293,7 +302,7 @@ CareInsChart <- childhealthdata %>%
   coord_flip() +
  theme_minimal()
 
-ggplotly(CareInsChart)
+ggplotly(CareInsChart, tooltip = "text")
 ```
 
 ### By Poverty Level 
@@ -302,7 +311,7 @@ ggplotly(CareInsChart)
 CarePovChart <- childhealthdata %>%
  filter(!(ForegoneCare %in% "Unknown")) %>%
  ggplot() +
- aes(x = ForegoneCare, fill = povlevelgrouped, text = paste("Children:", ..count..), text2 = paste("FPL:", povlevelgrouped)) +
+ aes(x = ForegoneCare, fill = povlevelgrouped, text = paste("Children: ", ..count.., "<br> Poverty Level: ", fill)) +
  geom_bar(position = "fill") +
  scale_fill_viridis_d(option = "viridis", 
  direction = 1) +
@@ -312,7 +321,7 @@ CarePovChart <- childhealthdata %>%
   coord_flip() +
  theme_minimal()
 
-ggplotly(CarePovChart, tooltip = c("text"))
+ggplotly(CarePovChart, tooltip = "text")
 ```
 
 
@@ -323,7 +332,7 @@ CareRaceChart <- childhealthdata %>%
  filter(!(ForegoneCare %in% "Unknown")) %>%
   filter(!(RaceCat %in% "Unknown")) %>%
  ggplot() +
- aes(x = RaceCat, fill = ForegoneCare, text = paste("Children:", ..count..)) +
+ aes(x = RaceCat, fill = ForegoneCare, text = paste("Children: ", ..count.., "<br> Care: ", fill)) +
  geom_bar(position = "fill") +
  scale_fill_viridis_d(option = "viridis", 
  direction = 1) +
@@ -333,20 +342,20 @@ CareRaceChart <- childhealthdata %>%
   coord_flip() +
  theme_minimal()
 
-ggplotly(CareRaceChart, tooltip = c("text"))
+ggplotly(CareRaceChart, tooltip = "text")
 ```
 
 
-Outcomes and Wellbeing 
+Outcomes and Wellbeing {data-orientation=columns}
 =====================================
 
-Wellbeing {.sidebar}
+Column {data-width=450} 
 --------------------------------------------------------------
+### Overview 
 Adverse Childhood Experiences, known as "ACEs", are potentially traumatic events that occur in childhood (ages 0-17). The events, included here, are not necessarily traumatic but have the potential to be, especially exposure to multiple. Here we look at ACEs in relation to overall health status (assessed by asking "In general, how would you describe this child's health?") & "Flourishing" status as assessed by responses to a set of 3 items (3 being ideal). 
 We see ACES correlated with worse health status, with worse  “flourishing” status and that the sum of ACEs across racial categories is disparate. That is, **ACEs correlate with worse outcomes and we see some Races disproportionately impacted.**
 
-
-Column
+Column  {data-width=850} 
 -------------------------------------------------------------
 
 ### ACEs by Racial Category
@@ -361,15 +370,13 @@ ACEandRACE <- childhealthdata %>%
  scale_fill_viridis_d(option = "viridis", 
  direction = 1) +
   scale_y_continuous(labels = scales::percent) +
- labs(x = "Race", y = "Proportion of Children", title = "Adverse Childhood Experiences (ACE) by Race in the US", 
- caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
  theme_minimal()
 
-ggplotly(ACEandRACE, tooltip = c("text", "ACEs"))
+ggplotly(ACEandRACE, tooltip = c("text", "ACEs")) %>% layout(title = "Adverse Childhood Experiences (ACE) by Race in the US", font=list(size = 10), xaxis = list(title = 'Proportion of Children', size = 9), yaxis = list(title = 'Race', size = 9), legend = list(title = 'Number of ACEs', size = 9))
+
+
 ```
 
-Column
--------------------------------------------------------------
 ### ACEs and Flourishing Status
 ```{r ACE and Flourish}
 
@@ -386,11 +393,26 @@ ggplot() +
   scale_fill_viridis_d(option = "viridis", 
  direction = 1) +
   scale_y_continuous(labels = scales::percent) +
- labs(x = "Flourishing Items Met", y = "Proportion of Children", title = "Flourishing Status & Adverse Childhood Experiences (ACE)",
- subtitle = "Count of Children in the US Meeting Flourishing Criteria by Number of Adverse Childhood Experiences", 
- caption = "Based on National Survey of Children's Health, 2019-2020", fill = "Number of ACEs") +
+  labs(x = "Flourishing Items Met", y = "Proportion of Children", fill = "Number of ACEs") +
  theme_minimal()
 
-ggplotly(FlrshAcePlot, tooltip = c("text", "ACEs"))
+
+ggplotly(FlrshAcePlot, tooltip = c("text", "ACEs")) %>% layout(title = "Flourishing Status & Adverse Childhood Experiences (ACE)", font=list(size = 10), xaxis = list(title = 'Proportion of Children', size = 9), yaxis = list(title = 'Flourishing Items', size = 9), legend = list(title = 'Number of ACEs', size = 9))
 ```
 
+Column {data-width=450} 
+-------------------------------------------------------------
+
+### ACE List
+
+**ACE List** <br>
+1. Hard to cover basics on family's income <br>
+2. Parent or guardian divorced or separated <br>
+3. Parent or guardian died <br>
+4. Parent or guardian served time in jail <br>
+5. Saw or heard parents or adults slap, hit, kick punch one another in the home <br>
+6. Was a victim of violence or witnessed violence in their neighborhood <br>
+7. Lived with anyone who was mentally ill, suicidal, or severely depressed <br>
+8. Lived with anyone who had a problem with alcohol or drugs <br>
+9. Treated or judged unfairly due to race/ethnicity <br>
+10. Treated or judged unfairly due to sexual orientation or gender identity 
