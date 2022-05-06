@@ -36,6 +36,7 @@ MissedNeededCare <- childhealthdata %>%
 uninsured <- childhealthdata %>%
   filter(InsGap_1920 == "Periods Uninsured")
 
+#make ACE categorical to show proportions of each
 childhealthdata <- childhealthdata %>% mutate(ACEs = recode_factor(ACEct_1920,
   "0" = "0",
   "1" = "1",
@@ -61,11 +62,11 @@ childhealthdata <- childhealthdata %>% mutate(povlevel = recode_factor(povlev4_1
   .default = "Unknown"))
 
 childhealthdata <- childhealthdata %>% mutate(RaceCat = recode_factor(Race, 
-  "1" = "Hispanic",
-  "2" = "White",
-  "4" = "Asian",
   "3" = "Black",
+  "2" = "White",
   "5" = "Other",
+  "1" = "Hispanic",
+  "4" = "Asian",
   "99" = "Unknown",
   .ordered = TRUE,
   .default = "Unknown"))
