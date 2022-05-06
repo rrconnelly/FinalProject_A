@@ -160,8 +160,8 @@ Column {data-width=650}
 childhealthdata <- childhealthdata %>% rename(Age = Child.Age)
 
 ageplot <- ggplot(childhealthdata) +
-  aes(x = Age, text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
-  geom_histogram(bins = 18L, fill = "#21918c") +
+  aes(x = round(Age, digits = 0), text = paste0("Age: ", x, "<br> Children: ", ..count..)) +
+  geom_histogram(bins = 17, fill = "#21918c") +
   labs(
     x = "Age of Child",
     y = "Number of Children",
